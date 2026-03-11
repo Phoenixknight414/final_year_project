@@ -42,6 +42,12 @@ export default function TrainerPage() {
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
         
+        // Handle exercise redirect
+        if (data.type === 'exercise_redirect') {
+          navigate(data.route, { state: { exercise: data.exercise } });
+          return;
+        }
+        
         if (data.type === 'stream') {
           // Handle streaming response
           setMessages(prev => {
@@ -141,6 +147,13 @@ export default function TrainerPage() {
 
       audioWs.onmessage = (event) => {
         const data = JSON.parse(event.data);
+        
+        // Handle exercise redirect
+        if (data.type === 'exercise_redirect') {
+          navigate(data.route, { state: { exercise: data.exercise } });
+          setIsLoading(false);
+          return;
+        }
         
         if (data.type === 'final_transcript') {
           const userMessage = {
@@ -268,7 +281,7 @@ export default function TrainerPage() {
                     ? 'bg-slate-800/60 backdrop-blur-sm'
                     : 'bg-blue-600/90'
                 }`}>
-                  <p className="text-sm leading-relaxed">{message.text}</p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.text}</p>
                 </div>
                 <span className="text-xs text-slate-500 mt-1 px-2">{message.timestamp}</span>
               </div>
