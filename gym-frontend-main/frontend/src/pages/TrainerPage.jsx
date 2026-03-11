@@ -200,9 +200,20 @@ export default function TrainerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f1419] text-white flex flex-col relative overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-slate-800/50 relative z-10">
+    <div className="min-h-screen bg-slate-950 text-white flex flex-col relative">
+      {/* Animated background - matching landing page */}
+      <div className="fixed inset-0 w-full h-full pointer-events-none z-0">
+        <div className="absolute w-[200vw] h-[200vh] left-[-50vw] top-[-50vh] opacity-30">
+          <div className="absolute top-[20%] left-[10%] w-[650px] h-[650px] bg-blue-400 rounded-full blur-sm animate-gradient-drift"></div>
+          <div className="absolute top-[60%] left-[70%] w-[700px] h-[700px] bg-violet-400 rounded-full blur-sm animate-gradient-pulse"></div>
+          <div className="absolute top-[40%] left-[40%] w-[600px] h-[600px] bg-indigo-300 rounded-full blur-sm animate-gradient-float"></div>
+          <div className="absolute top-[30%] left-[80%] w-[550px] h-[550px] bg-purple-400 rounded-full blur-sm animate-gradient-drift" style={{animationDelay: '3s'}}></div>
+          <div className="absolute top-[70%] left-[20%] w-[500px] h-[500px] bg-blue-300 rounded-full blur-sm animate-gradient-pulse" style={{animationDelay: '6s'}}></div>
+        </div>
+      </div>
+      
+      {/* Header - Fixed */}
+      <div className="fixed top-0 left-0 right-0 z-20 flex items-center justify-between p-4 border-b border-slate-800/50 bg-slate-950/80 backdrop-blur-md">
         <button
           onClick={() => navigate('/dashboard')}
           className="p-2 hover:bg-slate-800/50 rounded-lg transition-colors"
@@ -225,9 +236,9 @@ export default function TrainerPage() {
         <div className="w-10" /> {/* Spacer for centering */}
       </div>
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 pb-32">
-        <div className="max-w-4xl mx-auto space-y-4">
+      {/* Messages Area with 200px side margins - Add top padding for fixed header */}
+      <div className="flex-1 overflow-y-auto px-4 py-6 pb-64 pt-20">
+        <div className="mx-auto space-y-4" style={{ maxWidth: 'calc(100vw - 400px)', minWidth: '400px' }}>
           {messages.map((message) => (
             <div
               key={message.id}
@@ -251,7 +262,7 @@ export default function TrainerPage() {
               </div>
 
               {/* Message Bubble */}
-              <div className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'} max-w-[70%]`}>
+              <div className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`} style={{ maxWidth: '650px' }}>
                 <div className={`rounded-2xl px-4 py-3 ${
                   message.role === 'assistant'
                     ? 'bg-slate-800/60 backdrop-blur-sm'
@@ -275,7 +286,7 @@ export default function TrainerPage() {
             isChatOpen ? 'max-h-32 opacity-100 mb-6' : 'max-h-0 opacity-0 mb-0'
           }`}
         >
-          <div className="max-w-2xl mx-auto px-6 flex items-center gap-3">
+          <div className="mx-auto px-6 flex items-center gap-3" style={{ maxWidth: 'calc(100vw - 400px)', minWidth: '400px' }}>
             <input
               type="text"
               value={inputText}
