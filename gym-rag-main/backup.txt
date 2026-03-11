@@ -1,0 +1,33 @@
+@app.websocket("/ws/trainer")
+async def trainer_ws(websocket: WebSocket):
+    print("🔌 Client connected to trainer websocket")
+    await websocket.accept()
+
+    try:
+        while True:
+            data = await websocket.receive_json()
+            user_text = data["message"]
+            assistantId = data["assistantId"]
+
+            intent = detect_intent(user_text)
+            if intent == "recommend": 
+                response = recommend_workout() 
+            elif intent == "exercise": 
+                response = launch_exercise(user_text) 
+            else: 
+                response = get_rag_answer(user_text) 
+            
+            if intent == "exercise":
+                await websocket.send_json(response)
+
+            if intent != "exercise":
+                for char in response:
+                    await asyncio.sleep(0.02)
+                    await websocket.send_json({
+                        "type": "stream",
+                        "token": char,
+                        "assistantId": assistantId
+                    })
+            await websocket.send_json({"type": "done", "assistantId": assistantId})
+    except WebSocketDisconnect:
+        pass

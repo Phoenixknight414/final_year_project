@@ -1,0 +1,13 @@
+available exercises:
+    -biceps: 
+        --bicep curl
+        --hammer curl
+    -chest:
+        --chest fly
+        -- Pushups
+    -leg:
+        --Squats
+        --lunges
+    -shoulder:
+        --front raises
+        --side lateral            
