@@ -1,694 +1,342 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Mic,
-  Square,
-  Send,
-  Paperclip,
-  Volume2,
-  Trash2,
-  Sparkles,
-  Loader2,
-} from "lucide-react";
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-
-/**
- * Backend expectations (adjust in sendText/sendAudio):
- * - Text request: POST /api/trainer/text   { text: "..." }
- * - Audio request: POST /api/trainer/audio  form-data: audio=<blob/file>
- * Response: { text: "...", audioUrl?: "https://...", audioBase64?: "...", audioMime?: "audio/mpeg" }
- */
-
-function cn(...classes) {
-  return classes.filter(Boolean).join(" ");
-}
-
-function formatTime(ts) {
-  try {
-    return new Date(ts).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return "";
-  }
-}
-
-function base64ToObjectUrl(base64, mime = "audio/mpeg") {
-  const byteChars = atob(base64);
-  const byteNumbers = new Array(byteChars.length);
-  for (let i = 0; i < byteChars.length; i++)
-    byteNumbers[i] = byteChars.charCodeAt(i);
-  const blob = new Blob([new Uint8Array(byteNumbers)], { type: mime });
-  return URL.createObjectURL(blob);
-}
-
-function SoftWave({ analyser, isActive }) {
-  const canvasRef = useRef(null);
-  const rafRef = useRef(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
-
-    const resize = () => {
-      const { width, height } = canvas.getBoundingClientRect();
-      canvas.width = Math.floor(width * dpr);
-      canvas.height = Math.floor(height * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-
-    resize();
-    window.addEventListener("resize", resize);
-
-    const buffer = new Uint8Array(1024);
-
-    const draw = () => {
-      rafRef.current = requestAnimationFrame(draw);
-
-      const w = canvas.getBoundingClientRect().width;
-      const h = canvas.getBoundingClientRect().height;
-
-      ctx.clearRect(0, 0, w, h);
-
-      // Background glow lines
-      ctx.globalAlpha = 0.22;
-      ctx.beginPath();
-      ctx.roundRect?.(0, 0, w, h, 18);
-      ctx.fillStyle = "rgba(255,255,255,0.04)";
-      ctx.fill();
-      ctx.globalAlpha = 1;
-
-      // Waveform
-      const mid = h / 2;
-      const amp = Math.max(10, h * 0.25);
-
-      if (analyser && isActive) {
-        analyser.getByteTimeDomainData(buffer);
-      } else {
-        // idle animation
-        const t = Date.now() * 0.002;
-        for (let i = 0; i < buffer.length; i++) {
-          buffer[i] = 128 + Math.sin(t + i * 0.06) * 10;
-        }
-      }
-
-      ctx.lineWidth = 2.25;
-      ctx.strokeStyle = "rgba(255,255,255,0.75)";
-      ctx.shadowColor = "rgba(168,85,247,0.55)";
-      ctx.shadowBlur = 18;
-
-      ctx.beginPath();
-      for (let x = 0; x < w; x++) {
-        const idx = Math.floor((x / w) * (buffer.length - 1));
-        const v = (buffer[idx] - 128) / 128;
-        const y = mid + v * amp;
-
-        if (x === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-
-      // Sub-wave
-      ctx.shadowBlur = 0;
-      ctx.globalAlpha = 0.35;
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      for (let x = 0; x < w; x++) {
-        const idx = Math.floor((x / w) * (buffer.length - 1));
-        const v = (buffer[idx] - 128) / 128;
-        const y =
-          mid + v * amp * 0.5 + Math.sin(Date.now() * 0.002 + x * 0.02) * 3;
-
-        if (x === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.strokeStyle = "rgba(255,255,255,0.55)";
-      ctx.stroke();
-      ctx.globalAlpha = 1;
-    };
-
-    draw();
-
-    return () => {
-      window.removeEventListener("resize", resize);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-    };
-  }, [analyser, isActive]);
-
-  return (
-    <div className="relative w-full">
-      <canvas
-        ref={canvasRef}
-        className="h-24 w-full rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-md"
-      />
-      <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-white/10" />
-    </div>
-  );
-}
+import { ArrowLeft, Volume2, Mic, MessageSquare, Send, User, Loader2, Square } from "lucide-react";
 
 export default function TrainerPage() {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState([
     {
-      id: crypto.randomUUID(),
+      id: 1,
       role: "assistant",
-      text: "Ask me anything. You can type or use the mic.",
-      ts: Date.now(),
-    },
+      text: "Hello! I'm your AI fitness coach. I can help you with personalized diet plans, workout routines, and answer any fitness questions. Just speak to me!",
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }
   ]);
-
-  const [text, setText] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  const navigate = useNavigate();
-
-  // recording
+  const [inputText, setInputText] = useState("");
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef(null);
   const mediaRecorderRef = useRef(null);
-  const chunksRef = useRef([]);
+  const audioChunksRef = useRef([]);
   const wsRef = useRef(null);
   const audioWsRef = useRef(null);
 
-  // audio viz
-  const audioCtxRef = useRef(null);
-  const analyserRef = useRef(null);
-  const sourceRef = useRef(null);
-  const micStreamRef = useRef(null);
-
-  // scroll
-  const endRef = useRef(null);
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages.length]);
-
-  const canSendText = useMemo(
-    () => text.trim().length > 0 && !busy,
-    [text, busy],
-  );
-
-  const pushUserMessage = (payload) => {
-    setMessages((prev) => [
-      ...prev,
-      { id: crypto.randomUUID(), role: "user", ts: Date.now(), ...payload },
-    ]);
-  };
-
-  const pushAssistantMessage = (payload) => {
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        ts: Date.now(),
-        ...payload,
-      },
-    ]);
-  };
-
-  const clearChat = () => {
-    setMessages([
-      {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        text: "Cleared. Ask me anything.",
-        ts: Date.now(),
-      },
-    ]);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
-    wsRef.current = new WebSocket("ws://127.0.0.1:8000/ws/trainer");
+    scrollToBottom();
+  }, [messages]);
 
-    wsRef.current.onopen = () => {
-      console.log("WebSocket connected");
-    };
+  // Connect to trainer WebSocket for text messages
+  useEffect(() => {
+    const connectTrainerWs = () => {
+      const ws = new WebSocket('ws://127.0.0.1:8000/ws/trainer');
+      
+      ws.onopen = () => {
+        console.log('Connected to trainer WebSocket');
+      };
 
-    wsRef.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      console.log("Received WS message:", data);
-      if (data.type == "exercise_redirect") {
-        navigate("/live-workout", { state: { exercise: data.exercise } });
-      }
-
-      if (data.type === "stream") {
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === data.assistantId
-              ? { ...msg, text: msg.text + data.token }
-              : msg,
-          ),
-        );
-      }
-
-      if (data.type === "done") {
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === data.assistantId ? { ...msg, streaming: false } : msg,
-          ),
-        );
-        setBusy(false);
-      }
-
-      if (data.type === "final") {
-        let audioUrl = data.audioUrl;
-
-        if (!audioUrl && data.audioBase64) {
-          audioUrl = base64ToObjectUrl(
-            data.audioBase64,
-            data.audioMime || "audio/mpeg",
-          );
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        
+        if (data.type === 'stream') {
+          // Handle streaming response
+          setMessages(prev => {
+            const lastMsg = prev[prev.length - 1];
+            if (lastMsg && lastMsg.role === 'assistant' && lastMsg.id === data.assistantId) {
+              return prev.map(msg => 
+                msg.id === data.assistantId 
+                  ? { ...msg, text: msg.text + data.token }
+                  : msg
+              );
+            } else {
+              return [...prev, {
+                id: data.assistantId,
+                role: 'assistant',
+                text: data.token,
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              }];
+            }
+          });
+        } else if (data.type === 'done') {
+          setIsLoading(false);
         }
+      };
 
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === data.assistantId ? { ...msg, audioUrl } : msg,
-          ),
-        );
-      }
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      ws.onclose = () => {
+        console.log('WebSocket closed, reconnecting...');
+        setTimeout(connectTrainerWs, 3000);
+      };
+
+      wsRef.current = ws;
     };
 
-    wsRef.current.onerror = (err) => {
-      console.error("WebSocket error", err);
-    };
-
-    wsRef.current.onclose = () => {
-      console.log("WebSocket disconnected");
-    };
+    connectTrainerWs();
 
     return () => {
-      wsRef.current?.close();
-    };
-  }, []);
-
-  const onSendText = async () => {
-    const userText = text.trim();
-    if (!userText || busy) return;
-
-    setText("");
-    pushUserMessage({ text: userText });
-
-    setBusy(true);
-
-    // create empty assistant message
-    const assistantId = crypto.randomUUID();
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: assistantId,
-        role: "assistant",
-        text: "",
-        ts: Date.now(),
-        streaming: true,
-      },
-    ]);
-
-    wsRef.current.send(
-      JSON.stringify({
-        type: "text",
-        message: userText,
-        assistantId,
-      }),
-    );
-  };
-
-  useEffect(() => {
-    openAudioSocket();
-
-    return () => {
-      // cleanup when component unmounts
-      if (audioWsRef.current) {
-        audioWsRef.current.close();
-        audioWsRef.current = null;
+      if (wsRef.current) {
+        wsRef.current.close();
       }
     };
   }, []);
 
-  const openAudioSocket = () => {
-    const ws = new WebSocket("ws://127.0.0.1:8000/ws/audio");
-    ws.binaryType = "arraybuffer";
+  const handleSendMessage = () => {
+    if (!inputText.trim() || !wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
 
-    ws.onopen = () => console.log("audio ws connected");
-    ws.onmessage = (evt) => {
-      // backend can send transcript + assistant reply
-      // expected JSON
-      setBusy(false);
-      try {
-        const msg = JSON.parse(evt.data);
-        console.log(msg.type)
-        if (msg.type === "final_transcript") {
-          pushUserMessage({ text: `📝 ${msg.text}` });
-        } else if (msg.type === "assistant") {
-          pushAssistantMessage({ text: msg.text });
-        } else if (msg.type === "exercise_redirect") {
-          navigate("/live-workout", { state: { exercise: msg.exercise } });
-        } else if (msg.type === "error") {
-          pushAssistantMessage({ text: `Error: ${msg.message}` });
-        }
-      } catch {
-        // ignore non-json
-      }
+    const userMessage = {
+      id: Date.now(),
+      role: "user",
+      text: inputText,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
-    ws.onerror = () =>
-      pushAssistantMessage({ text: "Error: audio socket failed" });
-    ws.onclose = () => console.log("audio ws closed");
+    setMessages(prev => [...prev, userMessage]);
+    
+    const assistantId = Date.now() + 1;
+    wsRef.current.send(JSON.stringify({
+      message: inputText,
+      assistantId: assistantId
+    }));
 
-    audioWsRef.current = ws;
+    setInputText("");
+    setIsLoading(true);
+  };
+
+  const handleStopGeneration = () => {
+    setIsLoading(false);
+    // Optionally close and reconnect WebSocket to stop generation
+    if (wsRef.current) {
+      wsRef.current.close();
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
   };
 
   const startRecording = async () => {
-    if (busy) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
 
-    if (
-      !audioWsRef.current ||
-      audioWsRef.current.readyState !== WebSocket.OPEN
-    ) {
-      pushAssistantMessage({ text: "Audio socket not connected." });
-      return;
+      // Connect to audio WebSocket
+      const audioWs = new WebSocket('ws://127.0.0.1:8000/ws/audio');
+      audioWsRef.current = audioWs;
+
+      audioWs.onopen = () => {
+        console.log('Connected to audio WebSocket');
+      };
+
+      audioWs.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        
+        if (data.type === 'final_transcript') {
+          const userMessage = {
+            id: Date.now(),
+            role: "user",
+            text: `🎤 ${data.text}`,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          };
+          setMessages(prev => [...prev, userMessage]);
+        } else if (data.type === 'assistant') {
+          const aiResponse = {
+            id: Date.now() + 1,
+            role: "assistant",
+            text: data.text,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          };
+          setMessages(prev => [...prev, aiResponse]);
+          setIsLoading(false);
+        }
+      };
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0 && audioWs.readyState === WebSocket.OPEN) {
+          audioWs.send(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        if (audioWs.readyState === WebSocket.OPEN) {
+          audioWs.send(JSON.stringify({ type: 'stop' }));
+        }
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start(100); // Send chunks every 100ms
+      setIsRecording(true);
+      setIsLoading(true);
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+      alert('Could not access microphone. Please check permissions.');
     }
-
-    let chunks = [];
-
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    micStreamRef.current = stream;
-
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    const ac = new AudioCtx();
-    audioCtxRef.current = ac;
-
-    const analyser = ac.createAnalyser();
-    analyser.fftSize = 2048;
-    analyserRef.current = analyser;
-
-    const src = ac.createMediaStreamSource(stream);
-    sourceRef.current = src;
-    src.connect(analyser);
-
-    const mr = new MediaRecorder(stream, { mimeType: "audio/webm" });
-    mediaRecorderRef.current = mr;
-
-    mr.ondataavailable = (e) => {
-      if (e.data && e.data.size > 0) {
-        chunks.push(e.data);
-      }
-    };
-
-    mr.onstop = async () => {
-      // cleanup mic
-      stream.getTracks().forEach((t) => t.stop());
-      micStreamRef.current = null;
-
-      try {
-        sourceRef.current?.disconnect();
-      } catch {}
-      sourceRef.current = null;
-
-      try {
-        await audioCtxRef.current?.close();
-      } catch {}
-      audioCtxRef.current = null;
-      analyserRef.current = null;
-
-      // ✅ Create ONE proper WebM file
-      const blob = new Blob(chunks, { type: "audio/webm" });
-      const buf = await blob.arrayBuffer();
-
-      // ✅ Send complete file
-      audioWsRef.current?.send(buf);
-
-      // ✅ Tell backend recording finished
-      audioWsRef.current?.send(JSON.stringify({ type: "stop" }));
-
-      chunks = [];
-
-      setBusy(true);
-    };
-    // IMPORTANT: timeslice makes it stream
-    mr.start(); // 250ms chunks (or 500)
-    setIsRecording(true);
   };
 
   const stopRecording = () => {
-    if (!mediaRecorderRef.current) return;
-    console.log("recording stopped");
-    try {
+    if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
-    } catch {}
-    setIsRecording(false);
-  };
-
-  const onUploadAudio = async (file) => {
-    if (!file || busy) return;
-
-    pushUserMessage({ text: `📎 Uploaded: ${file.name}` });
-
-    setBusy(true);
-    try {
-      const data = await sendAudio(file);
-      await handleAssistantOutput(data);
-    } catch (e) {
-      pushAssistantMessage({
-        text: e?.message ? `Error: ${e.message}` : "Error: request failed",
-      });
-    } finally {
-      setBusy(false);
+      setIsRecording(false);
     }
   };
 
-  const playAudio = (audioUrl) => {
-    if (!audioUrl) return;
-    const a = new Audio(audioUrl);
-    a.play().catch(() => {});
+  const toggleRecording = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
   };
 
   return (
-    <div className="min-h-[calc(100vh-0px)] w-full bg-zinc-950 text-zinc-100">
-      {/* Background */}
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -top-40 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-600/30 via-fuchsia-500/20 to-sky-500/20 blur-3xl" />
-        <div className="absolute bottom-[-220px] right-[-160px] h-[520px] w-[520px] rounded-full bg-gradient-to-tr from-emerald-400/10 via-sky-400/10 to-violet-500/15 blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.06)_1px,transparent_0)] [background-size:24px_24px] opacity-25" />
-      </div>
-
-      <div className="relative mx-auto flex max-w-5xl flex-col gap-6 px-4 py-8">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/5 ring-1 ring-white/10">
-                <Sparkles className="h-5 w-5 text-violet-200" />
-              </div>
-              <h1 className="text-2xl font-semibold tracking-tight">Trainer</h1>
-              <Badge className="border-white/10 bg-white/5 text-zinc-200">
-                Voice + Text
-              </Badge>
-            </div>
-            <p className="text-sm text-zinc-300/80">
-              Modern assistant UI with waveform + mic. Inspired by the
-              sound-wave assistant concept.
-            </p>
+    <div className="min-h-screen bg-[#0f1419] text-white flex flex-col relative overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b border-slate-800/50 relative z-10">
+        <button
+          onClick={() => navigate('/dashboard')}
+          className="p-2 hover:bg-slate-800/50 rounded-lg transition-colors"
+        >
+          <ArrowLeft className="w-6 h-6" />
+        </button>
+        
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43L16.29 22l2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z"/>
+            </svg>
           </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              variant="secondary"
-              className="border border-white/10 bg-white/5 text-zinc-100 hover:bg-white/10"
-              onClick={clearChat}
-              disabled={busy || isRecording}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Clear
-            </Button>
+          <div>
+            <h1 className="text-lg font-semibold">GYM<span className="text-blue-500">eye</span> AI</h1>
+            <p className="text-xs text-slate-400">Voice Coach</p>
           </div>
         </div>
 
-        {/* Wave + Mic */}
-        <Card className="border-white/10 bg-white/[0.03] backdrop-blur-xl">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center justify-between text-base">
-              <span className="text-zinc-100">Voice Control</span>
-              <span className="text-xs text-zinc-300/70">
-                {isRecording ? "Listening…" : busy ? "Thinking…" : "Ready"}
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <SoftWave analyser={analyserRef.current} isActive={isRecording} />
+        <div className="w-10" /> {/* Spacer for centering */}
+      </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-2">
-                <Button
-                  className={cn(
-                    "h-11 rounded-2xl px-4",
-                    isRecording
-                      ? "bg-red-500/90 hover:bg-red-500 text-white"
-                      : "bg-violet-600 hover:bg-violet-600/90 text-white",
-                  )}
-                  onClick={isRecording ? stopRecording : startRecording}
-                  disabled={busy}
-                >
-                  {isRecording ? (
-                    <>
-                      <Square className="mr-2 h-4 w-4" /> Stop
-                    </>
-                  ) : (
-                    <>
-                      <Mic className="mr-2 h-4 w-4" /> Hold to talk
-                    </>
-                  )}
-                </Button>
-
-                <Button
-                  variant="secondary"
-                  className="h-11 rounded-2xl border border-white/10 bg-white/5 text-zinc-100 hover:bg-white/10"
-                  disabled={!messages.some((m) => m.audioUrl)}
-                  onClick={() => {
-                    // play latest assistant audio
-                    const lastAudio = [...messages]
-                      .reverse()
-                      .find(
-                        (m) => m.role === "assistant" && m.audioUrl,
-                      )?.audioUrl;
-                    if (lastAudio) playAudio(lastAudio);
-                  }}
-                >
-                  <Volume2 className="mr-2 h-4 w-4" />
-                  Play last audio
-                </Button>
+      {/* Messages Area */}
+      <div className="flex-1 overflow-y-auto px-4 py-6 pb-32">
+        <div className="max-w-4xl mx-auto space-y-4">
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex items-start gap-3 ${
+                message.role === 'user' ? 'flex-row-reverse' : ''
+              }`}
+            >
+              {/* Avatar */}
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                message.role === 'assistant'
+                  ? 'bg-gradient-to-br from-blue-500/20 to-purple-600/20 border border-blue-500/30'
+                  : 'bg-slate-700'
+              }`}>
+                {message.role === 'assistant' ? (
+                  <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43L16.29 22l2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z"/>
+                  </svg>
+                ) : (
+                  <User className="w-5 h-5" />
+                )}
               </div>
 
-              <div className="flex items-center gap-2">
-                <label className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-100 hover:bg-white/10">
-                  <Paperclip className="h-4 w-4" />
-                  Upload audio
-                  <input
-                    type="file"
-                    accept="audio/*"
-                    className="hidden"
-                    onChange={(e) => onUploadAudio(e.target.files?.[0])}
-                    disabled={busy}
-                  />
-                </label>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Chat */}
-        <Card className="border-white/10 bg-white/[0.03] backdrop-blur-xl">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Conversation</CardTitle>
-          </CardHeader>
-
-          <CardContent>
-            <div className="max-h-[52vh] space-y-3 overflow-y-auto pr-2">
-              <AnimatePresence initial={false}>
-                {messages.map((m) => (
-                  <motion.div
-                    key={m.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8 }}
-                    transition={{ duration: 0.18 }}
-                    className={cn(
-                      "flex w-full",
-                      m.role === "user" ? "justify-end" : "justify-start",
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        "max-w-[86%] rounded-3xl px-4 py-3 ring-1",
-                        m.role === "user"
-                          ? "bg-violet-600/25 ring-violet-300/15"
-                          : "bg-white/[0.04] ring-white/10",
-                      )}
-                    >
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="text-xs text-zinc-300/70">
-                          {m.role === "user" ? "You" : "Trainer"} •{" "}
-                          {formatTime(m.ts)}
-                        </div>
-
-                        {m.audioUrl ? (
-                          <Button
-                            size="sm"
-                            variant="secondary"
-                            className="h-8 rounded-xl border border-white/10 bg-white/5 px-3 text-zinc-100 hover:bg-white/10"
-                            onClick={() => playAudio(m.audioUrl)}
-                          >
-                            <Volume2 className="mr-2 h-4 w-4" />
-                            Play
-                          </Button>
-                        ) : null}
-                      </div>
-
-                      {m.text ? (
-                        <div className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-zinc-100">
-                          {m.text}
-                        </div>
-                      ) : null}
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-              <div ref={endRef} />
-            </div>
-
-            {/* Composer */}
-            <div className="mt-4 space-y-2">
-              <Textarea
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="Type your message…"
-                className="min-h-[92px] resize-none rounded-2xl border-white/10 bg-white/[0.03] text-zinc-100 placeholder:text-zinc-400 focus-visible:ring-2 focus-visible:ring-violet-500/40"
-                disabled={busy || isRecording}
-              />
-
-              <div className="flex items-center justify-between gap-2">
-                <div className="text-xs text-zinc-300/70">
-                  {busy
-                    ? "Processing…"
-                    : isRecording
-                      ? "Recording…"
-                      : "Enter to send (or click Send)"}
+              {/* Message Bubble */}
+              <div className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'} max-w-[70%]`}>
+                <div className={`rounded-2xl px-4 py-3 ${
+                  message.role === 'assistant'
+                    ? 'bg-slate-800/60 backdrop-blur-sm'
+                    : 'bg-blue-600/90'
+                }`}>
+                  <p className="text-sm leading-relaxed">{message.text}</p>
                 </div>
-
-                <Button
-                  onClick={onSendText}
-                  disabled={!canSendText}
-                  className="h-11 rounded-2xl bg-violet-600 text-white hover:bg-violet-600/90"
-                >
-                  {busy ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Sending
-                    </>
-                  ) : (
-                    <>
-                      <Send className="mr-2 h-4 w-4" />
-                      Send
-                    </>
-                  )}
-                </Button>
-              </div>
-
-              {/* Optional single-line quick input */}
-              <div className="hidden">
-                <Input />
+                <span className="text-xs text-slate-500 mt-1 px-2">{message.timestamp}</span>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
+      </div>
+
+      {/* Bottom Controls */}
+      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#0f1419] via-[#0f1419] to-transparent pt-8 pb-6">
+        {/* Text Input Area - Slides up when chat is open */}
+        <div
+          className={`transition-all duration-300 ease-in-out overflow-hidden ${
+            isChatOpen ? 'max-h-32 opacity-100 mb-6' : 'max-h-0 opacity-0 mb-0'
+          }`}
+        >
+          <div className="max-w-2xl mx-auto px-6 flex items-center gap-3">
+            <input
+              type="text"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Type a message..."
+              className="flex-1 bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
+            />
+            <button
+              onClick={isLoading ? handleStopGeneration : handleSendMessage}
+              disabled={!isLoading && !inputText.trim()}
+              className="w-12 h-12 rounded-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+            >
+              {isLoading ? (
+                <Square className="w-5 h-5" />
+              ) : (
+                <Send className="w-5 h-5" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Three Control Buttons - Fixed position */}
+        <div className="flex items-center justify-center gap-6">
+          {/* Volume Button */}
+          <button className="w-14 h-14 rounded-full bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 hover:bg-slate-700/60 flex items-center justify-center transition-all">
+            <Volume2 className="w-6 h-6 text-slate-400" />
+          </button>
+
+          {/* Mic Button - Center, Larger */}
+          <button
+            onClick={toggleRecording}
+            disabled={isLoading && !isRecording}
+            className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${
+              isRecording
+                ? 'bg-red-600 hover:bg-red-700 scale-110'
+                : 'bg-blue-600 hover:bg-blue-700'
+            }`}
+          >
+            <Mic className="w-7 h-7" />
+          </button>
+
+          {/* Chat Button */}
+          <button
+            onClick={() => setIsChatOpen(!isChatOpen)}
+            className={`w-14 h-14 rounded-full backdrop-blur-sm border flex items-center justify-center transition-all ${
+              isChatOpen
+                ? 'bg-blue-600 border-blue-500 scale-110'
+                : 'bg-slate-800/60 border-slate-700/50 hover:bg-slate-700/60'
+            }`}
+          >
+            <MessageSquare className={`w-6 h-6 ${isChatOpen ? 'text-white' : 'text-slate-400'}`} />
+          </button>
+        </div>
+
+        {/* Hint Text */}
+        <div className="text-center mt-4">
+          <p className="text-xs text-slate-500">
+            {isLoading ? 'Processing...' : isRecording ? 'Recording... Tap mic to stop' : isChatOpen ? 'Type your message' : 'Tap to start voice chat'}
+          </p>
+        </div>
       </div>
     </div>
   );

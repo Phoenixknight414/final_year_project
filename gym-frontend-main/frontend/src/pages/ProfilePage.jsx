@@ -243,28 +243,28 @@ const ProfilePage = () => {
           {/* Workouts */}
           <div className="bg-slate-800/60 backdrop-blur-sm rounded-xl p-3 flex flex-col items-center border border-blue-500/20">
             <Dumbbell className="w-5 h-5 text-blue-400 mb-2" />
-            <div className="text-[20px] font-bold text-white mb-0.5">48</div>
+            <div className="text-[14px] font-bold text-white mb-0.5 text-center leading-tight">48</div>
             <div className="text-slate-400 text-[10px]">Workouts</div>
           </div>
 
           {/* Streak */}
           <div className="bg-slate-800/60 backdrop-blur-sm rounded-xl p-3 flex flex-col items-center border border-blue-500/20">
             <Flame className="w-5 h-5 text-blue-400 mb-2" />
-            <div className="text-[20px] font-bold text-white mb-0.5">12 days</div>
+            <div className="text-[14px] font-bold text-white mb-0.5 text-center leading-tight">12 days</div>
             <div className="text-slate-400 text-[10px]">Streak</div>
           </div>
 
           {/* Joined */}
           <div className="bg-slate-800/60 backdrop-blur-sm rounded-xl p-3 flex flex-col items-center border border-blue-500/20">
             <Calendar className="w-5 h-5 text-blue-400 mb-2" />
-            <div className="text-[20px] font-bold text-white mb-0.5">Mar 2025</div>
+            <div className="text-[14px] font-bold text-white mb-0.5 text-center leading-tight">Mar 2025</div>
             <div className="text-slate-400 text-[10px]">Joined</div>
           </div>
 
           {/* Level */}
           <div className="bg-slate-800/60 backdrop-blur-sm rounded-xl p-3 flex flex-col items-center border border-blue-500/20">
             <Award className="w-5 h-5 text-blue-400 mb-2" />
-            <div className="text-[20px] font-bold text-white mb-0.5">Intermediate</div>
+            <div className="text-[14px] font-bold text-white mb-0.5 text-center leading-tight">Intermediate</div>
             <div className="text-slate-400 text-[10px]">Level</div>
           </div>
         </div>

@@ -13,7 +13,7 @@ import asyncio
 
 app = FastAPI()
 
-print("🔥 AI Fitness Trainer Ready!")
+print("[READY] AI Fitness Trainer Ready!")
 
 model = WhisperModel(
     "base",          # best accuracy

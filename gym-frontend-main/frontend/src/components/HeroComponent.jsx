@@ -1,17 +1,27 @@
+import { useNavigate } from 'react-router-dom';
+
 export default function HeroComponent() {
+  const navigate = useNavigate();
+
   return (
-    <section className="pt-40 pb-32 px-6 relative overflow-hidden min-h-screen flex items-center">
-      {/* Premium animated background - matching reference opacity and positioning */}
-      <div className="absolute inset-0 opacity-25">
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-blue-600 rounded-full blur-3xl animate-gradient-drift"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-purple-600 rounded-full blur-3xl animate-gradient-pulse" style={{animationDelay: '2s'}}></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-indigo-500 rounded-full blur-3xl animate-gradient-drift" style={{animationDelay: '4s'}}></div>
+    <>
+      {/* Background animation layer - fixed, stays visible on scroll, subtle glow behind content */}
+      <div className="fixed inset-0 w-full h-full pointer-events-none z-0">
+        <div className="absolute w-[200vw] h-[200vh] left-[-50vw] top-[-50vh] opacity-30">
+          <div className="absolute top-[20%] left-[10%] w-[650px] h-[650px] bg-blue-400 rounded-full blur-sm animate-gradient-drift"></div>
+          <div className="absolute top-[60%] left-[70%] w-[700px] h-[700px] bg-violet-400 rounded-full blur-sm animate-gradient-pulse"></div>
+          <div className="absolute top-[40%] left-[40%] w-[600px] h-[600px] bg-indigo-300 rounded-full blur-sm animate-gradient-float"></div>
+          <div className="absolute top-[30%] left-[80%] w-[550px] h-[550px] bg-purple-400 rounded-full blur-sm animate-gradient-drift" style={{animationDelay: '3s'}}></div>
+          <div className="absolute top-[70%] left-[20%] w-[500px] h-[500px] bg-blue-300 rounded-full blur-sm animate-gradient-pulse" style={{animationDelay: '6s'}}></div>
+        </div>
       </div>
+
+      <section className="pt-40 pb-32 px-6 relative min-h-screen flex items-center z-10">
 
       {/* Subtle grid overlay - matching reference */}
       <div className="absolute inset-0 bg-[linear-gradient(rgba(148,163,184,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.02)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)]"></div>
 
-      <div className="max-w-7xl mx-auto relative z-10 w-full">
+      <div className="max-w-7xl mx-auto relative z-20 w-full">
         {/* Badge - exact positioning and styling from reference */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-950/40 border border-blue-800/40 rounded-full text-blue-400 text-sm mb-16 backdrop-blur-sm hover:border-blue-700/60 transition-colors duration-300">
@@ -43,7 +53,10 @@ export default function HeroComponent() {
 
         {/* Buttons - exact sizing and spacing from reference */}
         <div className="flex items-center justify-center gap-4">
-          <button className="group relative bg-blue-600 hover:bg-blue-700 px-9 py-4 rounded-xl font-semibold text-base transition-all duration-300 flex items-center gap-2.5 hover:scale-[1.02] overflow-hidden shadow-lg shadow-blue-600/20">
+          <button 
+            onClick={() => navigate('/login')}
+            className="group relative bg-blue-600 hover:bg-blue-700 px-9 py-4 rounded-xl font-semibold text-base transition-all duration-300 flex items-center gap-2.5 hover:scale-[1.02] overflow-hidden shadow-lg shadow-blue-600/20"
+          >
             <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <svg className="w-5 h-5 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
@@ -60,6 +73,7 @@ export default function HeroComponent() {
           </button>
         </div>
       </div>
-    </section>
+      </section>
+    </>
   );
 }

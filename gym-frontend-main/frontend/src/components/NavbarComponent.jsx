@@ -34,15 +34,8 @@ export default function NavbarComponent() {
           <a href="#how-it-works" className="hover:text-white transition-colors duration-300">How It Works</a>
         </div>
 
-        {/* Action buttons - fade in with delay */}
-        <div className="flex items-center gap-4 animate-fade-in animate-delay-300">
-          <Link to="/login" className="text-slate-300 hover:text-white transition-colors">
-            Log In
-          </Link>
-          <Link to="/login" className="bg-blue-600 hover:bg-blue-700 px-6 py-2.5 rounded-lg font-semibold transition-all hover:scale-105 hover-glow">
-            Get Started
-          </Link>
-        </div>
+        {/* Empty spacer to maintain layout balance */}
+        <div className="w-32"></div>
       </div>
     </nav>
   );

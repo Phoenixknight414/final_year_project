@@ -4,7 +4,7 @@ export default function FooterComponent() {
   const [footerRef, isVisible] = useScrollReveal({ threshold: 0.1 });
 
   return (
-    <footer ref={footerRef} className="border-t border-slate-800 py-16 px-6 bg-slate-950">
+    <footer ref={footerRef} className="relative border-t border-slate-800 py-16 px-6 bg-slate-950 z-10">
       <div className="max-w-7xl mx-auto">
         {/* Main Footer Content */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-12 mb-12">

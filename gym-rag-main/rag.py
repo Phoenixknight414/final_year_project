@@ -56,7 +56,7 @@ def load_or_build_faiss():
             saved_hash = f.read()
 
         if saved_hash == current_hash:
-            print("✅ Using existing FAISS index")
+            print("[OK] Using existing FAISS index")
             return FAISS.load_local(
                 INDEX_FOLDER,
                 embeddings,
@@ -64,7 +64,7 @@ def load_or_build_faiss():
             )
 
     # Otherwise rebuild index
-    print("🔄 Exercise folder changed. Rebuilding FAISS index...")
+    print("[INFO] Exercise folder changed. Rebuilding FAISS index...")
 
     documents = []
 
@@ -89,7 +89,7 @@ def load_or_build_faiss():
     with open(HASH_FILE, "w") as f:
         f.write(current_hash)
 
-    print("✅ FAISS index rebuilt")
+    print("[OK] FAISS index rebuilt")
 
     return vectorstore
 
