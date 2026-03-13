@@ -19,6 +19,7 @@ const DashboardPage = () => {
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const [selectedDay, setSelectedDay] = useState('T');
+  const [recentWorkouts, setRecentWorkouts] = useState([]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -44,7 +45,25 @@ const DashboardPage = () => {
       }
     };
 
+    // Fetch recent workout sessions
+    const fetchRecentWorkouts = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/workout/sessions/recent', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const data = await response.json();
+        if (data.success) {
+          setRecentWorkouts(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching recent workouts:', error);
+      }
+    };
+
     fetchUserData();
+    fetchRecentWorkouts();
   }, [navigate]);
 
   const handleLogout = () => {
@@ -71,12 +90,46 @@ const DashboardPage = () => {
     { name: 'Rest', day: 'Sunday', completed: false }
   ];
 
-  const recentWorkouts = [
-    { name: 'Upper Body Strength', icon: '💪', duration: '45 min', calories: 320, time: 'Today' },
-    { name: 'HIIT Cardio Blast', icon: '🔥', duration: '30 min', calories: 410, time: 'Yesterday' },
-    { name: 'Leg Day Power', icon: '🦵', duration: '50 min', calories: 380, time: '2d ago' },
-    { name: 'Core & Flexibility', icon: '🧘', duration: '35 min', calories: 220, time: '3d ago' }
-  ];
+  // Exercise icon mapping
+  const getExerciseIcon = (exerciseName) => {
+    const iconMap = {
+      'Bicep Curl': '💪',
+      'Hammer Curl': '🔨',
+      'Push-ups': '🤸',
+      'Chest Fly': '🦅',
+      'Lateral Raises': '🙆',
+      'Front Raises': '🙋',
+      'Squats': '🏋️',
+      'Lunges': '🦵'
+    };
+    return iconMap[exerciseName] || '💪';
+  };
+
+  // Format time ago
+  const getTimeAgo = (date) => {
+    const now = new Date();
+    const workoutDate = new Date(date);
+    const diffInMs = now - workoutDate;
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    if (diffInHours < 24) {
+      return 'Today';
+    } else if (diffInDays === 1) {
+      return 'Yesterday';
+    } else {
+      return `${diffInDays}d ago`;
+    }
+  };
+
+  // Format duration from seconds to minutes
+  const formatDuration = (seconds) => {
+    if (seconds < 60) {
+      return `${seconds} sec`;
+    }
+    const minutes = Math.floor(seconds / 60);
+    return `${minutes} min`;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
@@ -301,27 +354,35 @@ const DashboardPage = () => {
               </div>
 
               <div className="space-y-3">
-                {recentWorkouts.map((workout, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 rounded-xl bg-slate-700/30 hover:bg-slate-700/50 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{workout.icon}</span>
-                      <div>
-                        <div className="text-white font-medium text-sm">{workout.name}</div>
-                        <div className="flex items-center gap-3 text-slate-400 text-xs mt-1">
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {workout.duration}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Flame className="w-3 h-3" />
-                            {workout.calories}
-                          </span>
+                {recentWorkouts.length > 0 ? (
+                  recentWorkouts.map((workout, index) => (
+                    <div key={index} className="flex items-center justify-between p-3 rounded-xl bg-slate-700/30 hover:bg-slate-700/50 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{getExerciseIcon(workout.exerciseName)}</span>
+                        <div>
+                          <div className="text-white font-medium text-sm">{workout.exerciseName}</div>
+                          <div className="flex items-center gap-3 text-slate-400 text-xs mt-1">
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {formatDuration(workout.duration)}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Flame className="w-3 h-3" />
+                              {workout.calories}
+                            </span>
+                          </div>
                         </div>
                       </div>
+                      <span className="text-slate-400 text-xs">{getTimeAgo(workout.createdAt)}</span>
                     </div>
-                    <span className="text-slate-400 text-xs">{workout.time}</span>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-slate-400">
+                    <Activity className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p className="text-sm">No recent workouts yet</p>
+                    <p className="text-xs mt-1">Start a workout to see it here!</p>
                   </div>
-                ))}
+                )}
               </div>
             </div>
           </div>

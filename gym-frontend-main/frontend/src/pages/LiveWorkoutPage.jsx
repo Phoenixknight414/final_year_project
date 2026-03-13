@@ -256,7 +256,7 @@ const LiveWorkoutPage = () => {
     });
   };
 
-  const handleStopWorkout = () => {
+  const handleStopWorkout = async () => {
     setWorkoutStarted(false);
 
     if (timerIntervalRef.current) {
@@ -267,6 +267,34 @@ const LiveWorkoutPage = () => {
     if (formScoreIntervalRef.current) {
       clearInterval(formScoreIntervalRef.current);
       formScoreIntervalRef.current = null;
+    }
+
+    // Save workout session to database
+    try {
+      const token = localStorage.getItem('token');
+      if (token && time > 0) { // Only save if there was actual workout time
+        const response = await fetch('http://localhost:5000/api/workout/sessions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            exerciseName: currentExercise,
+            reps: reps,
+            calories: calories,
+            duration: time
+          })
+        });
+
+        if (response.ok) {
+          console.log('Workout session saved successfully');
+        } else {
+          console.error('Failed to save workout session');
+        }
+      }
+    } catch (error) {
+      console.error('Error saving workout session:', error);
     }
 
     // 🔥 Restart preview camera

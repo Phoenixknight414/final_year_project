@@ -262,9 +262,9 @@ export default function LateralRaiseTracker({ onFeedbackChange, onRepCount }) {
   }, []);
 
   return (
-    <div style={{ textAlign: "center" }}>
+    <div style={{ textAlign: "center", width: "100%", height: "100%" }}>
       <video ref={videoRef} style={{ display: "none" }} />
-      <canvas ref={canvasRef} width="640" height="480" />
+      <canvas ref={canvasRef} width="640" height="480" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
     </div>
   );
 }

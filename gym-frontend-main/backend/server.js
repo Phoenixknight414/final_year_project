@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import authRoutes from './routes/auth.js';
 import profileRoutes from './routes/profile.js';
+import workoutRoutes from './routes/workout.js';
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/workout', workoutRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
