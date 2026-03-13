@@ -7,6 +7,7 @@ import SetupProfilePage from './pages/SetupProfilePage.jsx';
 import LiveWorkoutPage from './pages/LiveWorkoutPage.jsx';
 import TrainerPage from './pages/TrainerPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
+import AnalyticsDashboard from './pages/AnalyticsDashboard.jsx';
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="/trainer" element={<TrainerPage />} />
         <Route path="/live-workout" element={<LiveWorkoutPage />} />
         <Route path="/explore" element={<ExplorePage />} />
+        <Route path="/analytics" element={<AnalyticsDashboard />} />
       </Routes>
     </Router>
   );

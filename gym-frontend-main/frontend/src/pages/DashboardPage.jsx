@@ -147,7 +147,10 @@ const DashboardPage = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <button className="p-2 hover:bg-slate-800 rounded-lg transition-colors">
+            <button 
+              onClick={() => navigate('/analytics')}
+              className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
+            >
               <Bell className="w-5 h-5 text-slate-400" />
             </button>
             <button className="p-2 hover:bg-slate-800 rounded-lg transition-colors">

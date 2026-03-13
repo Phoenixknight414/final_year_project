@@ -131,27 +131,160 @@
   }
 }
 
-/* Background gradient drift - fast horizontal movement */
+/* Background gradient drift - slower with bouncing movement to all corners */
 @keyframes gradientDrift {
   0% {
     transform: translate(0, 0) scale(1);
     opacity: 0.9;
   }
-  25% {
-    transform: translate(300px, -100px) scale(1.3);
+  12.5% {
+    transform: translate(600px, -300px) scale(1.6);
     opacity: 1;
   }
-  50% {
-    transform: translate(-200px, 150px) scale(0.8);
+  25% {
+    transform: translate(400px, 250px) scale(0.7);
     opacity: 0.85;
   }
+  37.5% {
+    transform: translate(-500px, 200px) scale(1.4);
+    opacity: 0.95;
+  }
+  50% {
+    transform: translate(-400px, -250px) scale(0.8);
+    opacity: 0.9;
+  }
+  62.5% {
+    transform: translate(300px, -200px) scale(1.5);
+    opacity: 1;
+  }
   75% {
-    transform: translate(250px, 80px) scale(1.2);
+    transform: translate(550px, 150px) scale(0.9);
+    opacity: 0.85;
+  }
+  87.5% {
+    transform: translate(-300px, 100px) scale(1.3);
     opacity: 0.95;
   }
   100% {
     transform: translate(0, 0) scale(1);
     opacity: 0.9;
+  }
+}
+
+@keyframes gradientDrift2 {
+  0% {
+    transform: translate(0, 0) scale(1.2);
+    opacity: 0.85;
+  }
+  12.5% {
+    transform: translate(-450px, 280px) scale(0.8);
+    opacity: 0.95;
+  }
+  25% {
+    transform: translate(350px, -180px) scale(1.5);
+    opacity: 1;
+  }
+  37.5% {
+    transform: translate(-300px, -220px) scale(1.1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translate(500px, 200px) scale(0.7);
+    opacity: 0.85;
+  }
+  62.5% {
+    transform: translate(-550px, 100px) scale(1.4);
+    opacity: 1;
+  }
+  75% {
+    transform: translate(250px, -250px) scale(0.9);
+    opacity: 0.9;
+  }
+  87.5% {
+    transform: translate(400px, 150px) scale(1.3);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate(0, 0) scale(1.2);
+    opacity: 0.85;
+  }
+}
+
+@keyframes gradientDrift3 {
+  0% {
+    transform: translate(0, 0) scale(0.9);
+    opacity: 0.9;
+  }
+  12.5% {
+    transform: translate(320px, 220px) scale(1.4);
+    opacity: 1;
+  }
+  25% {
+    transform: translate(-480px, -150px) scale(0.8);
+    opacity: 0.85;
+  }
+  37.5% {
+    transform: translate(550px, -280px) scale(1.2);
+    opacity: 0.95;
+  }
+  50% {
+    transform: translate(-350px, 180px) scale(1.5);
+    opacity: 1;
+  }
+  62.5% {
+    transform: translate(200px, 250px) scale(0.7);
+    opacity: 0.85;
+  }
+  75% {
+    transform: translate(-500px, -200px) scale(1.3);
+    opacity: 0.9;
+  }
+  87.5% {
+    transform: translate(450px, -100px) scale(1.0);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate(0, 0) scale(0.9);
+    opacity: 0.9;
+  }
+}
+
+@keyframes gradientDrift4 {
+  0% {
+    transform: translate(0, 0) scale(1.1);
+    opacity: 0.8;
+  }
+  12.5% {
+    transform: translate(-520px, -180px) scale(1.3);
+    opacity: 0.95;
+  }
+  25% {
+    transform: translate(280px, 260px) scale(0.9);
+    opacity: 0.85;
+  }
+  37.5% {
+    transform: translate(480px, -220px) scale(1.5);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(-400px, 150px) scale(0.8);
+    opacity: 0.9;
+  }
+  62.5% {
+    transform: translate(350px, 200px) scale(1.2);
+    opacity: 0.95;
+  }
+  75% {
+    transform: translate(-280px, -280px) scale(1.4);
+    opacity: 1;
+  }
+  87.5% {
+    transform: translate(520px, 120px) scale(0.7);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(0, 0) scale(1.1);
+    opacity: 0.8;
   }
 }
 
@@ -296,9 +429,21 @@
   animation: pulse 4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
-/* Background effects - fast moving */
+/* Background effects - slower with more movement */
 .animate-gradient-drift {
-  animation: gradientDrift 12s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  animation: gradientDrift 30s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+.animate-gradient-drift-2 {
+  animation: gradientDrift2 35s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+.animate-gradient-drift-3 {
+  animation: gradientDrift3 28s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+.animate-gradient-drift-4 {
+  animation: gradientDrift4 32s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
 .animate-gradient-pulse {

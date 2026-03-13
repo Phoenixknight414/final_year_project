@@ -14,6 +14,7 @@ import {
   Weight,
   Target
 } from 'lucide-react';
+import AnimatedBackground from '../components/AnimatedBackground';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -148,13 +149,8 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4 overflow-hidden">
-      {/* Animated background effects - More vivid */}
-      <div className="absolute inset-0 opacity-40 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/30 rounded-full blur-3xl animate-gradient-drift"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl animate-gradient-drift" style={{animationDelay: '3s'}}></div>
-        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-indigo-500/30 rounded-full blur-3xl animate-gradient-drift" style={{animationDelay: '6s'}}></div>
-      </div>
+    <div className="fixed inset-0 flex items-center justify-center p-4 overflow-hidden">
+      <AnimatedBackground />
 
       {/* Main Profile Card - 560px x 530px */}
       <div className="relative z-10 w-[560px] bg-slate-900/90 backdrop-blur-xl rounded-[28px] shadow-2xl border border-slate-700/50 p-6">
