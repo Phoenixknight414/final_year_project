@@ -260,42 +260,145 @@ export default function TrainerPage() {
       {/* Loading Screen with Robot Animation */}
       {showLoadingScreen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-          <div className="text-center">
-            {/* Robot Container */}
-            <div className="relative mb-8">
-              {/* Robot Body */}
-              <div className="relative inline-block animate-bounce">
-                {/* Head */}
-                <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mx-auto mb-2 relative shadow-2xl shadow-blue-500/50">
-                  {/* Eyes */}
-                  <div className="absolute top-6 left-4 w-4 h-4 bg-white rounded-full animate-pulse"></div>
-                  <div className="absolute top-6 right-4 w-4 h-4 bg-white rounded-full animate-pulse"></div>
-                  {/* Smile */}
-                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-10 h-2 border-b-2 border-white rounded-full"></div>
-                  {/* Antenna */}
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-1 h-4 bg-blue-400"></div>
-                  <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-blue-400 rounded-full animate-ping"></div>
-                </div>
+          <div className="text-center flex flex-col items-center">
+            {/* Robot Running on Treadmill */}
+            <div className="relative mb-6">
+              <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+                {/* Treadmill Base */}
+                <rect x="30" y="160" width="140" height="8" rx="4" fill="url(#treadmillGrad)" opacity="0.6"/>
                 
-                {/* Body */}
-                <div className="w-20 h-16 bg-gradient-to-br from-blue-600 to-purple-700 rounded-xl mx-auto shadow-xl shadow-blue-500/30">
-                  {/* Chest Light */}
-                  <div className="absolute top-28 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-cyan-400 rounded-full animate-pulse"></div>
-                </div>
-              </div>
-              
-              {/* Waving Hand */}
-              <div className="absolute -right-8 top-8 text-4xl origin-bottom-right animate-wave">
-                👋
-              </div>
+                {/* Treadmill Belt Lines (moving) */}
+                <g opacity="0.4">
+                  <line x1="40" y1="164" x2="60" y2="164" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round">
+                    <animate attributeName="x1" values="40;160" dur="0.6s" repeatCount="indefinite"/>
+                    <animate attributeName="x2" values="60;180" dur="0.6s" repeatCount="indefinite"/>
+                  </line>
+                  <line x1="70" y1="164" x2="90" y2="164" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round">
+                    <animate attributeName="x1" values="70;190" dur="0.6s" repeatCount="indefinite"/>
+                    <animate attributeName="x2" values="90;210" dur="0.6s" repeatCount="indefinite"/>
+                  </line>
+                  <line x1="100" y1="164" x2="120" y2="164" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round">
+                    <animate attributeName="x1" values="100;220" dur="0.6s" repeatCount="indefinite"/>
+                    <animate attributeName="x2" values="120;240" dur="0.6s" repeatCount="indefinite"/>
+                  </line>
+                  <line x1="130" y1="164" x2="150" y2="164" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round">
+                    <animate attributeName="x1" values="130;250" dur="0.6s" repeatCount="indefinite"/>
+                    <animate attributeName="x2" values="150;270" dur="0.6s" repeatCount="indefinite"/>
+                  </line>
+                </g>
+
+                {/* Robot Body - Bouncing */}
+                <g>
+                  <animateTransform 
+                    attributeName="transform" 
+                    type="translate" 
+                    values="0,0; 0,-8; 0,0" 
+                    dur="0.6s" 
+                    repeatCount="indefinite"/>
+                  
+                  {/* Antenna */}
+                  <line x1="100" y1="40" x2="100" y2="60" stroke="url(#outlineGrad)" strokeWidth="3" strokeLinecap="round"/>
+                  <circle cx="100" cy="40" r="4" fill="url(#glowGrad)">
+                    <animate attributeName="opacity" values="1;0.3;1" dur="1s" repeatCount="indefinite"/>
+                  </circle>
+
+                  {/* Head */}
+                  <rect x="70" y="60" width="60" height="50" rx="12" stroke="url(#outlineGrad)" strokeWidth="4" fill="none"/>
+                  
+                  {/* Eyes */}
+                  <rect x="82" y="78" width="10" height="14" rx="3" fill="url(#eyeGrad)"/>
+                  <rect x="108" y="78" width="10" height="14" rx="3" fill="url(#eyeGrad)"/>
+
+                  {/* Mouth */}
+                  <line x1="85" y1="98" x2="115" y2="98" stroke="url(#outlineGrad)" strokeWidth="3" strokeLinecap="round"/>
+
+                  {/* Body */}
+                  <rect x="75" y="118" width="50" height="45" rx="14" stroke="url(#outlineGrad)" strokeWidth="4" fill="none"/>
+
+                  {/* Chest Circle */}
+                  <circle cx="100" cy="140" r="6" fill="url(#glowGrad)">
+                    <animate attributeName="opacity" values="1;0.4;1" dur="1.5s" repeatCount="indefinite"/>
+                  </circle>
+                </g>
+
+                {/* Left Arm - Swinging */}
+                <g transform-origin="70 125">
+                  <animateTransform 
+                    attributeName="transform" 
+                    type="rotate" 
+                    values="30 70 125; -30 70 125; 30 70 125" 
+                    dur="0.6s" 
+                    repeatCount="indefinite"/>
+                  <rect x="52" y="120" width="18" height="30" rx="9" stroke="url(#outlineGrad)" strokeWidth="4" fill="none"/>
+                </g>
+
+                {/* Right Arm - Swinging (opposite) */}
+                <g transform-origin="130 125">
+                  <animateTransform 
+                    attributeName="transform" 
+                    type="rotate" 
+                    values="-30 130 125; 30 130 125; -30 130 125" 
+                    dur="0.6s" 
+                    repeatCount="indefinite"/>
+                  <rect x="130" y="120" width="18" height="30" rx="9" stroke="url(#outlineGrad)" strokeWidth="4" fill="none"/>
+                </g>
+
+                {/* Left Leg - Running */}
+                <g transform-origin="85 163">
+                  <animateTransform 
+                    attributeName="transform" 
+                    type="rotate" 
+                    values="-40 85 163; 40 85 163; -40 85 163" 
+                    dur="0.6s" 
+                    repeatCount="indefinite"/>
+                  <rect x="82" y="163" width="12" height="28" rx="6" stroke="url(#outlineGrad)" strokeWidth="4" fill="none"/>
+                </g>
+
+                {/* Right Leg - Running (opposite) */}
+                <g transform-origin="115 163">
+                  <animateTransform 
+                    attributeName="transform" 
+                    type="rotate" 
+                    values="40 115 163; -40 115 163; 40 115 163" 
+                    dur="0.6s" 
+                    repeatCount="indefinite"/>
+                  <rect x="106" y="163" width="12" height="28" rx="6" stroke="url(#outlineGrad)" strokeWidth="4" fill="none"/>
+                </g>
+
+                <defs>
+                  <linearGradient id="outlineGrad" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#60a5fa"/>
+                    <stop offset="50%" stopColor="#a78bfa"/>
+                    <stop offset="100%" stopColor="#c084fc"/>
+                  </linearGradient>
+                  <linearGradient id="treadmillGrad" x1="30" y1="164" x2="170" y2="164" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#1e293b"/>
+                    <stop offset="50%" stopColor="#334155"/>
+                    <stop offset="100%" stopColor="#1e293b"/>
+                  </linearGradient>
+                  <radialGradient id="glowGrad" cx="0.5" cy="0.5" r="0.5">
+                    <stop offset="0%" stopColor="#60a5fa"/>
+                    <stop offset="100%" stopColor="#a78bfa"/>
+                  </radialGradient>
+                  <linearGradient id="eyeGrad" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+                    <stop offset="0%" stopColor="#60a5fa"/>
+                    <stop offset="100%" stopColor="#a78bfa"/>
+                  </linearGradient>
+                </defs>
+              </svg>
             </div>
-            
+
             {/* Text */}
-            <div className="space-y-2 animate-fade-in">
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                Hi there!
-              </h2>
-              <p className="text-slate-400 text-lg">Your AI Coach is ready...</p>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent animate-fade-in">
+              Warming up...
+            </h2>
+            <p className="text-slate-400 text-sm mt-2 animate-fade-in" style={{ animationDelay: '0.2s' }}>Your AI Coach is getting ready</p>
+            
+            {/* Loading dots */}
+            <div className="flex items-center justify-center gap-2 mt-4">
+              <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
             </div>
           </div>
         </div>

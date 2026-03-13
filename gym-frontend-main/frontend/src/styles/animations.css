@@ -710,3 +710,114 @@ input[type="number"] {
   animation: wave 2s ease-in-out infinite;
   transform-origin: 70% 70%;
 }
+
+/* Robot Animations */
+@keyframes scan {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+@keyframes blink {
+  0%, 90%, 100% {
+    opacity: 1;
+  }
+  95% {
+    opacity: 0;
+  }
+}
+
+@keyframes blinkEyes {
+  0%, 90%, 100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
+  }
+}
+
+@keyframes waveArm {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  10% {
+    transform: rotate(-20deg);
+  }
+  20% {
+    transform: rotate(-10deg);
+  }
+  30% {
+    transform: rotate(-25deg);
+  }
+  40% {
+    transform: rotate(-10deg);
+  }
+  50% {
+    transform: rotate(-20deg);
+  }
+  60% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes waveHand {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(15deg);
+  }
+  75% {
+    transform: rotate(-15deg);
+  }
+}
+
+@keyframes armLeft {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-15deg);
+  }
+}
+
+@keyframes armRight {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(15deg);
+  }
+}
+
+.animate-scan {
+  animation: scan 2s ease-in-out infinite;
+}
+
+.animate-blink {
+  animation: blink 3s ease-in-out infinite;
+}
+
+.animate-blink-eyes {
+  animation: blinkEyes 3s ease-in-out infinite;
+}
+
+.animate-wave-arm {
+  animation: waveArm 2s ease-in-out infinite;
+}
+
+.animate-wave-hand {
+  animation: waveHand 0.5s ease-in-out infinite;
+}
+
+.animate-arm-left {
+  animation: armLeft 2s ease-in-out infinite;
+}
+
+.animate-arm-right {
+  animation: armRight 2s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
