@@ -61,11 +61,84 @@ const LiveWorkoutPage = () => {
   const [calories, setCalories] = useState(0);
   const [time, setTime] = useState(0);
   const [sets, setSets] = useState(1);
-  const [formScore, setFormScore] = useState(0);
+  const [formScore, setFormScore] = useState(100);
   const [feedback, setFeedback] = useState("");
   const [landmarks, setLandmarks] = useState([]);
   const timerIntervalRef = useRef(null);
+  const formScoreIntervalRef = useRef(null);
   const lastRepCountRef = useRef(0); // Track last rep count for set detection
+  
+  // Error severity mapping - each error has a specific form score
+  const getFormScoreForError = (errorMessage) => {
+    const errorMap = {
+      // Critical errors (0-30%)
+      "Rotate your hand so that thumb is on top": 0,
+      "KEEP YOUR BACK STRAIGHT!": 40,
+      
+      // Major errors (40-60%)
+      "DON'T MOVE LEFT ELBOW!": 50,
+      "DON'T MOVE RIGHT ELBOW!": 50,
+      "LEVEL YOUR SHOULDERS!": 50,
+      "SHOULDERS NOT LEVEL!": 50,
+      "DON'T BEND ELBOWS TOO MUCH!": 55,
+      "DON'T GO ABOVE SHOULDERS!": 60,
+      "RAISE ARMS FORWARD!": 60,
+      "MOVE BOTH HANDS SIDEWAYS!": 60,
+      
+      // Moderate errors (65-75%)
+      "Left arm bending too much": 70,
+      "Right arm bending too much": 70,
+      "BEND BOTH KNEES EQUALLY!": 70,
+      "BEND BOTH LEGS!": 70,
+      "GO LOWER!": 75,
+      
+      // Minor errors (80-85%)
+      "Straighten LEFT arm!": 80,
+      "Straighten RIGHT arm!": 80,
+      "Lower your body": 85,
+      "Push up!": 85,
+      "Keep body straight": 80,
+    };
+    
+    return errorMap[errorMessage] ?? 60; // Default to 60 if error not mapped
+  };
+  
+  // Update form score based on feedback with smooth transitions
+  useEffect(() => {
+    if (!workoutStarted) return;
+    
+    // Clear any existing interval
+    if (formScoreIntervalRef.current) {
+      clearInterval(formScoreIntervalRef.current);
+      formScoreIntervalRef.current = null;
+    }
+    
+    const targetScore = feedback === "" ? 100 : getFormScoreForError(feedback);
+    
+    // Smoothly transition to target score
+    formScoreIntervalRef.current = setInterval(() => {
+      setFormScore((prev) => {
+        if (prev === targetScore) {
+          clearInterval(formScoreIntervalRef.current);
+          formScoreIntervalRef.current = null;
+          return targetScore;
+        }
+        
+        // Move towards target score
+        if (prev < targetScore) {
+          return Math.min(targetScore, prev + 2); // Increase by 2
+        } else {
+          return Math.max(targetScore, prev - 3); // Decrease by 3 (faster drop)
+        }
+      });
+    }, 100); // Update every 100ms
+    
+    return () => {
+      if (formScoreIntervalRef.current) {
+        clearInterval(formScoreIntervalRef.current);
+      }
+    };
+  }, [feedback, workoutStarted]);
 
   const exercises = [
     { name: "Squats", icon: "🏋️", reps: 15, file: SquatTracker },
@@ -165,6 +238,7 @@ const LiveWorkoutPage = () => {
     setCalories(0);
     setTime(0);
     setSets(1);
+    setFormScore(100);
     setFeedback("");
 
     // Start timer (increment every second)
@@ -173,12 +247,26 @@ const LiveWorkoutPage = () => {
     }, 1000);
   };
 
+  const handleRepCount = (increment) => {
+    setReps((prev) => {
+      const newReps = prev + increment;
+      // Calculate calories: approximately 0.5 calories per rep (adjust as needed)
+      setCalories(Math.round(newReps * 0.5));
+      return newReps;
+    });
+  };
+
   const handleStopWorkout = () => {
     setWorkoutStarted(false);
 
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
       timerIntervalRef.current = null;
+    }
+    
+    if (formScoreIntervalRef.current) {
+      clearInterval(formScoreIntervalRef.current);
+      formScoreIntervalRef.current = null;
     }
 
     // 🔥 Restart preview camera
@@ -260,7 +348,7 @@ const LiveWorkoutPage = () => {
                 </div>
               ) : workoutStarted ? (
                 <Suspense fallback={<div>Loading...</div>}>
-                  <Exercisefile />
+                  <Exercisefile onFeedbackChange={setFeedback} onRepCount={handleRepCount} />
                 </Suspense>
               ) : (
                 <div className="absolute inset-0 bg-black">
@@ -430,15 +518,15 @@ const LiveWorkoutPage = () => {
             </div>
             <div className="flex items-center justify-center flex-1">
               {!workoutStarted ? (
-                <p className="text-slate-400 text-sm text-center">
+                <p className="text-slate-400 text-base text-center">
                   Feedback will appear here during workout
                 </p>
               ) : feedback ? (
-                <p className="text-red-400 text-sm text-center font-semibold">
+                <p className="text-red-400 text-xl text-center font-bold leading-relaxed">
                   ⚠️ {feedback}
                 </p>
               ) : (
-                <p className="text-green-400 text-sm text-center">
+                <p className="text-green-400 text-lg text-center font-semibold">
                   ✓ Correct form! Keep going!
                 </p>
               )}

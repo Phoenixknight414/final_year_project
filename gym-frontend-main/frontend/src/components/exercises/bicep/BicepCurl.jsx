@@ -1,7 +1,7 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import PoseDetector from "../module/PoseDetector";
 
-export default function BicepCurlTracker() {
+export default function BicepCurlTracker({ onFeedbackChange, onRepCount }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
@@ -13,6 +13,12 @@ export default function BicepCurlTracker() {
   const badFrames = useRef(0);
   const goodFrames = useRef(0);
   const currentMsg = useRef("");
+  
+  const [feedbackMessage, setFeedbackMessage] = useState("");
+  
+  // Track previous counts to detect when both arms complete a rep
+  const prevRcount = useRef(0);
+  const prevLcount = useRef(0);
 
   const requiredFrames = 7;
 
@@ -76,14 +82,20 @@ export default function BicepCurlTracker() {
             badFrames.current++;
             goodFrames.current = 0;
 
-            if (badFrames.current >= requiredFrames)
+            if (badFrames.current >= requiredFrames) {
               currentMsg.current = newMsg;
+              setFeedbackMessage(newMsg);
+              if (onFeedbackChange) onFeedbackChange(newMsg);
+            }
           } else {
             goodFrames.current++;
             badFrames.current = 0;
 
-            if (goodFrames.current >= requiredFrames)
+            if (goodFrames.current >= requiredFrames) {
               currentMsg.current = "";
+              setFeedbackMessage("");
+              if (onFeedbackChange) onFeedbackChange("");
+            }
           }
 
           // -------- COUNTING --------
@@ -113,6 +125,21 @@ export default function BicepCurlTracker() {
               lcount.current += 0.5;
               dir2.current = 0;
             }
+          }
+
+          // Check if both arms completed a rep (both increased by 1)
+          const rightCompleted = Math.floor(rcount.current) > Math.floor(prevRcount.current);
+          const leftCompleted = Math.floor(lcount.current) > Math.floor(prevLcount.current);
+          
+          if (rightCompleted && leftCompleted) {
+            // Both arms completed a rep, send to parent
+            if (onRepCount) onRepCount(1);
+            prevRcount.current = Math.floor(rcount.current);
+            prevLcount.current = Math.floor(lcount.current);
+          } else if (rightCompleted) {
+            prevRcount.current = Math.floor(rcount.current);
+          } else if (leftCompleted) {
+            prevLcount.current = Math.floor(lcount.current);
           }
         }
 

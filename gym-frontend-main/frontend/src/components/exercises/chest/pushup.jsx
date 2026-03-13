@@ -1,12 +1,17 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import PoseDetector from "../module/PoseDetector";
 
-export default function PushUpTracker() {
+export default function PushUpTracker({ onFeedbackChange, onRepCount }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
   const counter = useRef(0);
   const stage = useRef("up");
+  
+  const [feedbackMessage, setFeedbackMessage] = useState("");
+  
+  // Track previous count to detect completed reps
+  const prevCounter = useRef(0);
 
   useEffect(() => {
     const pose = new PoseDetector();
@@ -90,6 +95,12 @@ export default function PushUpTracker() {
             ) {
               stage.current = "up";
               counter.current += 1;
+              
+              // Check if rep completed
+              if (counter.current > prevCounter.current) {
+                if (onRepCount) onRepCount(1);
+                prevCounter.current = counter.current;
+              }
             }
           } else {
             feedback = "Keep body straight";
@@ -100,6 +111,12 @@ export default function PushUpTracker() {
             feedback = "Lower your body";
           } else if (angle < 90) {
             feedback = "Push up!";
+          }
+
+          // Send feedback to parent
+          if (feedback !== feedbackMessage) {
+            setFeedbackMessage(feedback);
+            if (onFeedbackChange) onFeedbackChange(feedback);
           }
 
           if (bodyAngle > 160) {

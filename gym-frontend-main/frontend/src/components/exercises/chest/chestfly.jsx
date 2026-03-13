@@ -1,7 +1,7 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import PoseDetector from "../module/PoseDetector";
 
-export default function ChestFlyTracker() {
+export default function ChestFlyTracker({ onFeedbackChange, onRepCount }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
@@ -11,6 +11,12 @@ export default function ChestFlyTracker() {
   const badFrames = useRef(0);
   const goodFrames = useRef(0);
   const currentMsg = useRef("");
+  const lastSentMsg = useRef("");
+  
+  const [feedbackMessage, setFeedbackMessage] = useState("");
+  
+  // Track previous count to detect completed reps
+  const prevRcount = useRef(0);
 
   const requiredFrames = 7;
 
@@ -108,14 +114,20 @@ export default function ChestFlyTracker() {
             badFrames.current++;
             goodFrames.current = 0;
 
-            if (badFrames.current >= requiredFrames)
+            if (badFrames.current >= requiredFrames) {
               currentMsg.current = newMsg;
+              setFeedbackMessage(newMsg);
+              if (onFeedbackChange) onFeedbackChange(newMsg);
+            }
           } else {
             goodFrames.current++;
             badFrames.current = 0;
 
-            if (goodFrames.current >= requiredFrames)
+            if (goodFrames.current >= requiredFrames) {
               currentMsg.current = "";
+              setFeedbackMessage("");
+              if (onFeedbackChange) onFeedbackChange("");
+            }
           }
 
           // -------- REP COUNTING --------
@@ -126,6 +138,12 @@ export default function ChestFlyTracker() {
             if (dir1.current === 0) {
               rcount.current += 1;
               dir1.current = 1;
+              
+              // Check if rep completed
+              if (Math.floor(rcount.current) > Math.floor(prevRcount.current)) {
+                if (onRepCount) onRepCount(1);
+                prevRcount.current = Math.floor(rcount.current);
+              }
             }
           }
 
