@@ -16,12 +16,12 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/setup-profile" element={<SetupProfilePage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/dashboard" element={<AnalyticsDashboard />} />
+        <Route path="/old-dashboard" element={<DashboardPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/trainer" element={<TrainerPage />} />
         <Route path="/live-workout" element={<LiveWorkoutPage />} />
         <Route path="/explore" element={<ExplorePage />} />
-        <Route path="/analytics" element={<AnalyticsDashboard />} />
       </Routes>
     </Router>
   );

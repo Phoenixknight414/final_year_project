@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   ArrowLeft,
   Activity,
@@ -14,6 +14,7 @@ import AnimatedBackground from '../components/AnimatedBackground';
 
 const AnalyticsDashboard = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
@@ -32,6 +33,8 @@ const AnalyticsDashboard = () => {
           }
         });
         const data = await response.json();
+        console.log('Dashboard fetched user data:', data);
+        console.log('Profile image in data:', data.data?.profileImage ? 'YES' : 'NO');
         if (data.success) {
           setUserData(data.data);
         }
@@ -41,7 +44,30 @@ const AnalyticsDashboard = () => {
     };
 
     fetchUserData();
-  }, [navigate]);
+  }, [navigate, location]);
+
+  // Refetch data when window gains focus
+  useEffect(() => {
+    const handleFocus = () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        fetch('http://localhost:5000/api/profile', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) setUserData(data.data);
+        })
+        .catch(err => console.error(err));
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, []);
 
   return (
     <>
@@ -61,17 +87,19 @@ const AnalyticsDashboard = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5 text-slate-400" />
-            </button>
             <button 
               onClick={() => navigate('/profile')}
-              className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold hover:bg-blue-600 transition-colors"
+              className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold hover:bg-blue-600 transition-colors overflow-hidden"
             >
-              {userData?.name?.charAt(0).toUpperCase() || 'U'}
+              {userData?.profileImage ? (
+                <img 
+                  src={userData.profileImage} 
+                  alt="Profile" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                userData?.name?.charAt(0).toUpperCase() || 'U'
+              )}
             </button>
           </div>
         </div>
@@ -267,6 +295,120 @@ const AnalyticsDashboard = () => {
               <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
                 <div className="h-full bg-gradient-to-r from-pink-500 to-pink-400 rounded-full" style={{ width: '85%' }}></div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* This Week Section */}
+        <div className="bg-slate-900/95 backdrop-blur-xl rounded-[28px] shadow-2xl border border-slate-700/50 p-6 mb-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <Calendar className="w-6 h-6 text-blue-400" />
+              <h2 className="text-xl font-bold text-white">This Week</h2>
+            </div>
+            <span className="text-slate-400 text-sm">3/7 completed</span>
+          </div>
+
+          {/* Day Selector */}
+          <div className="flex gap-2 mb-6">
+            {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => (
+              <button
+                key={index}
+                className={`flex-1 py-2 rounded-lg font-medium transition-colors ${
+                  index === 3
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-slate-700/50 text-slate-400 hover:bg-slate-700'
+                }`}
+              >
+                {day}
+              </button>
+            ))}
+          </div>
+
+          {/* Workout List */}
+          <div className="space-y-3">
+            {/* Chest & Triceps - Completed */}
+            <div className="flex items-center justify-between p-4 rounded-xl bg-slate-700/30">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center bg-blue-500">
+                  <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span className="text-white font-medium">Chest & Triceps</span>
+              </div>
+              <span className="text-slate-400 text-sm">Monday</span>
+            </div>
+
+            {/* Back & Biceps - Completed */}
+            <div className="flex items-center justify-between p-4 rounded-xl bg-slate-700/30">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center bg-blue-500">
+                  <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span className="text-white font-medium">Back & Biceps</span>
+              </div>
+              <span className="text-slate-400 text-sm">Tuesday</span>
+            </div>
+
+            {/* Rest - Completed */}
+            <div className="flex items-center justify-between p-4 rounded-xl bg-slate-700/30">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center bg-blue-500">
+                  <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span className="text-white font-medium">Rest</span>
+              </div>
+              <span className="text-slate-400 text-sm">Wednesday</span>
+            </div>
+
+            {/* Legs - Today */}
+            <div className="flex items-center justify-between p-4 rounded-xl bg-blue-500/10 border border-blue-500/30">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center border-2 border-slate-600">
+                </div>
+                <span className="text-white font-medium">Legs</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-slate-400 text-sm">Thursday</span>
+                <span className="px-2 py-1 bg-blue-500 text-white text-xs rounded-md font-medium">
+                  TODAY
+                </span>
+              </div>
+            </div>
+
+            {/* HIIT - Upcoming */}
+            <div className="flex items-center justify-between p-4 rounded-xl bg-slate-700/30">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center border-2 border-slate-600">
+                </div>
+                <span className="text-slate-400 font-medium">HIIT</span>
+              </div>
+              <span className="text-slate-400 text-sm">Friday</span>
+            </div>
+
+            {/* Full Body - Upcoming */}
+            <div className="flex items-center justify-between p-4 rounded-xl bg-slate-700/30">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center border-2 border-slate-600">
+                </div>
+                <span className="text-slate-400 font-medium">Full Body</span>
+              </div>
+              <span className="text-slate-400 text-sm">Saturday</span>
+            </div>
+
+            {/* Rest - Upcoming */}
+            <div className="flex items-center justify-between p-4 rounded-xl bg-slate-700/30">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-full flex items-center justify-center border-2 border-slate-600">
+                </div>
+                <span className="text-slate-400 font-medium">Rest</span>
+              </div>
+              <span className="text-slate-400 text-sm">Sunday</span>
             </div>
           </div>
         </div>

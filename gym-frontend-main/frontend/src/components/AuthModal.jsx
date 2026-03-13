@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import LoadingScreen from './LoadingScreen';
 
 export default function AuthModal() {
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showLoadingScreen, setShowLoadingScreen] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     email: '',
@@ -52,12 +54,8 @@ export default function AuthModal() {
           profileCompleted: data.data.profileCompleted || false
         }));
         
-        // Redirect based on profile completion
-        if (data.data.profileCompleted) {
-          navigate('/dashboard');
-        } else {
-          navigate('/setup-profile');
-        }
+        // Show loading screen
+        setShowLoadingScreen(true);
       } else {
         setError(data.message || 'Authentication failed');
       }
@@ -66,6 +64,16 @@ export default function AuthModal() {
       setError('Unable to connect to server. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLoadingComplete = () => {
+    const user = JSON.parse(localStorage.getItem('user'));
+    // Redirect based on profile completion
+    if (user.profileCompleted) {
+      navigate('/dashboard');
+    } else {
+      navigate('/setup-profile');
     }
   };
 
@@ -79,6 +87,11 @@ export default function AuthModal() {
   const handleClose = () => {
     navigate('/');
   };
+
+  // Show loading screen if authentication successful
+  if (showLoadingScreen) {
+    return <LoadingScreen onComplete={handleLoadingComplete} />;
+  }
 
   return (
     <div className="animate-modal-appear">

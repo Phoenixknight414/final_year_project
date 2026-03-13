@@ -56,6 +56,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['Weight Loss', 'Weight Gain', 'Fat Loss', 'Muscle Building', 'General Fitness']
   },
+  profileImage: {
+    type: String,
+    default: null
+  },
   createdAt: {
     type: Date,
     default: Date.now

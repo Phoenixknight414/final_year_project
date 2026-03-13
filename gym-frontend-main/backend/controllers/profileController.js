@@ -84,7 +84,7 @@ export const getProfile = async (req, res) => {
 // @access  Private
 export const updateProfile = async (req, res) => {
   try {
-    const { name, email, age, gender, height, weight, targetWeight, goal } = req.body;
+    const { name, email, age, gender, height, weight, targetWeight, goal, profileImage } = req.body;
 
     const updateData = {};
     if (name) updateData.fullName = name;
@@ -95,6 +95,7 @@ export const updateProfile = async (req, res) => {
     if (weight) updateData.weight = weight;
     if (targetWeight) updateData.targetWeight = targetWeight;
     if (goal) updateData.fitnessGoal = goal;
+    if (profileImage !== undefined) updateData.profileImage = profileImage;
 
     const user = await User.findByIdAndUpdate(
       req.user._id,

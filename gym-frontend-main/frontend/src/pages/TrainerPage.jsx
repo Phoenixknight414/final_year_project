@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Volume2, Mic, MessageSquare, Send, User, Loader2, Square } from "lucide-react";
+import AnimatedBackground from "../components/AnimatedBackground";
 
 export default function TrainerPage() {
   const navigate = useNavigate();
@@ -213,17 +214,8 @@ export default function TrainerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col relative">
-      {/* Animated background - matching landing page */}
-      <div className="fixed inset-0 w-full h-full pointer-events-none z-0">
-        <div className="absolute w-[200vw] h-[200vh] left-[-50vw] top-[-50vh] opacity-30">
-          <div className="absolute top-[20%] left-[10%] w-[650px] h-[650px] bg-blue-400 rounded-full blur-sm animate-gradient-drift"></div>
-          <div className="absolute top-[60%] left-[70%] w-[700px] h-[700px] bg-violet-400 rounded-full blur-sm animate-gradient-pulse"></div>
-          <div className="absolute top-[40%] left-[40%] w-[600px] h-[600px] bg-indigo-300 rounded-full blur-sm animate-gradient-float"></div>
-          <div className="absolute top-[30%] left-[80%] w-[550px] h-[550px] bg-purple-400 rounded-full blur-sm animate-gradient-drift" style={{animationDelay: '3s'}}></div>
-          <div className="absolute top-[70%] left-[20%] w-[500px] h-[500px] bg-blue-300 rounded-full blur-sm animate-gradient-pulse" style={{animationDelay: '6s'}}></div>
-        </div>
-      </div>
+    <div className="min-h-screen text-white flex flex-col relative">
+      <AnimatedBackground />
       
       {/* Header - Fixed */}
       <div className="fixed top-0 left-0 right-0 z-20 flex items-center justify-between p-4 border-b border-slate-800/50 bg-slate-950/80 backdrop-blur-md">
@@ -250,7 +242,7 @@ export default function TrainerPage() {
       </div>
 
       {/* Messages Area with 200px side margins - Add top padding for fixed header */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 pb-64 pt-20">
+      <div className="relative z-10 flex-1 overflow-y-auto px-4 py-6 pb-64 pt-24">
         <div className="mx-auto space-y-4" style={{ maxWidth: 'calc(100vw - 400px)', minWidth: '400px' }}>
           {messages.map((message) => (
             <div
@@ -292,7 +284,7 @@ export default function TrainerPage() {
       </div>
 
       {/* Bottom Controls */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#0f1419] via-[#0f1419] to-transparent pt-8 pb-6">
+      <div className="fixed bottom-0 left-0 right-0 z-30 bg-gradient-to-t from-[#0f1419] via-[#0f1419] to-transparent pt-8 pb-6">
         {/* Text Input Area - Slides up when chat is open */}
         <div
           className={`transition-all duration-300 ease-in-out overflow-hidden ${

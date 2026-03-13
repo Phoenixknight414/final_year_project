@@ -21,6 +21,8 @@ const ProfilePage = () => {
   const [userData, setUserData] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
   const [editedData, setEditedData] = useState({
     name: '',
     email: '',
@@ -54,6 +56,7 @@ const ProfilePage = () => {
         const data = await response.json();
         if (data.success) {
           setUserData(data.data);
+          setProfileImage(data.data.profileImage || null);
           setEditedData({
             name: data.data.name || '',
             email: data.data.email || '',
@@ -81,35 +84,76 @@ const ProfilePage = () => {
 
   const handleEditToggle = () => {
     if (isEditing) {
-      // Save changes
-      handleSaveProfile();
+      // Check if any changes were made
+      const hasChanges = 
+        editedData.name !== (userData?.name || '') ||
+        editedData.email !== (userData?.email || '') ||
+        editedData.age !== (userData?.age || '') ||
+        editedData.gender !== (userData?.gender || '') ||
+        editedData.height !== (userData?.height || '') ||
+        editedData.weight !== (userData?.weight || '') ||
+        editedData.targetWeight !== (userData?.targetWeight || '') ||
+        editedData.goal !== (userData?.goal || '') ||
+        profileImage !== (userData?.profileImage || null);
+
+      if (hasChanges) {
+        // Show confirmation modal if changes were made
+        setShowSaveModal(true);
+      } else {
+        // Just exit editing mode if no changes
+        setIsEditing(false);
+      }
     } else {
       setIsEditing(true);
     }
   };
 
+  const handleConfirmSave = () => {
+    setShowSaveModal(false);
+    handleSaveProfile();
+  };
+
+  const handleCancelSave = () => {
+    setShowSaveModal(false);
+    setIsEditing(false);
+    // Reset edited data to original
+    setEditedData({
+      name: userData?.name || '',
+      email: userData?.email || '',
+      age: userData?.age || '',
+      gender: userData?.gender || '',
+      height: userData?.height || '',
+      weight: userData?.weight || '',
+      targetWeight: userData?.targetWeight || '',
+      goal: userData?.goal || ''
+    });
+  };
+
   const handleSaveProfile = async () => {
     const token = localStorage.getItem('token');
     try {
+      console.log('Saving profile with image:', profileImage ? 'Image present' : 'No image');
       const response = await fetch('http://localhost:5000/api/profile', {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(editedData)
+        body: JSON.stringify({
+          ...editedData,
+          profileImage: profileImage
+        })
       });
       const data = await response.json();
+      console.log('Save response:', data);
       if (data.success) {
         setUserData(data.data);
-        setIsEditing(false);
-        alert('Profile updated successfully!');
-      } else {
-        alert('Failed to update profile');
       }
     } catch (error) {
       console.error('Error updating profile:', error);
-      alert('Error updating profile');
+    } finally {
+      // Always exit editing mode after save attempt
+      setIsEditing(false);
     }
   };
 
@@ -148,6 +192,34 @@ const ProfilePage = () => {
     }));
   };
 
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image size should be less than 5MB');
+        return;
+      }
+      
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please upload an image file');
+        return;
+      }
+
+      // Create a preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const triggerImageUpload = () => {
+    document.getElementById('profile-image-input').click();
+  };
+
   return (
     <div className="fixed inset-0 flex items-center justify-center p-4 overflow-hidden">
       <AnimatedBackground />
@@ -166,23 +238,57 @@ const ProfilePage = () => {
             onClick={handleEditToggle}
             className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
               isEditing 
-                ? 'bg-blue-500 hover:bg-blue-600' 
+                ? 'bg-green-500 hover:bg-green-600' 
                 : 'bg-transparent hover:bg-[#2a3142]'
             }`}
           >
-            <Edit2 className={`w-5 h-5 ${isEditing ? 'text-white' : 'text-slate-400'}`} />
+            {isEditing ? (
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            ) : (
+              <Edit2 className="w-5 h-5 text-slate-400" />
+            )}
           </button>
         </div>
 
         {/* Profile Avatar */}
         <div className="flex flex-col items-center mb-5">
-          <div className="relative mb-3">
-            <div className="w-[90px] h-[90px] rounded-full bg-gradient-to-br from-[#5b7cff] to-[#8b5cf6] flex items-center justify-center text-white text-[36px] font-bold shadow-lg">
-              {(isEditing ? editedData.name : userData?.name)?.substring(0, 2).toUpperCase() || 'AJ'}
-            </div>
-            <button className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-[#5b7cff] hover:bg-[#4d6ee6] flex items-center justify-center shadow-md transition-colors border-2 border-[#1e2433]">
-              <Camera className="w-3.5 h-3.5 text-white" />
-            </button>
+          <div className="relative mb-3 group">
+            {profileImage ? (
+              <img 
+                src={profileImage} 
+                alt="Profile" 
+                className="w-[90px] h-[90px] rounded-full object-cover shadow-lg border-2 border-slate-700"
+              />
+            ) : (
+              <div className="w-[90px] h-[90px] rounded-full bg-gradient-to-br from-[#5b7cff] to-[#8b5cf6] flex items-center justify-center text-white text-[36px] font-bold shadow-lg">
+                {(isEditing ? editedData.name : userData?.name)?.substring(0, 2).toUpperCase() || 'AJ'}
+              </div>
+            )}
+            
+            {/* WhatsApp-style overlay - only visible in editing mode */}
+            {isEditing && (
+              <>
+                <input
+                  type="file"
+                  id="profile-image-input"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                <button 
+                  onClick={triggerImageUpload}
+                  className="absolute inset-0 w-[90px] h-[90px] rounded-full bg-black/0 hover:bg-black/60 flex flex-col items-center justify-center transition-all duration-200 group"
+                >
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center">
+                    <Camera className="w-6 h-6 text-white mb-1" />
+                    <span className="text-white text-[10px] font-medium">CHANGE</span>
+                    <span className="text-white text-[10px] font-medium">PHOTO</span>
+                  </div>
+                </button>
+              </>
+            )}
           </div>
 
           {/* Name */}
@@ -220,12 +326,17 @@ const ProfilePage = () => {
           <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-slate-800/80 rounded-full border border-blue-500/30">
             <Dumbbell className="w-3.5 h-3.5 text-blue-400" />
             {isEditing ? (
-              <input
-                type="text"
+              <select
                 value={editedData.goal}
                 onChange={(e) => handleInputChange('goal', e.target.value)}
-                className="text-white font-medium text-[13px] bg-transparent border-b border-slate-600 w-32"
-              />
+                className="text-white font-medium text-[13px] bg-transparent outline-none cursor-pointer"
+              >
+                <option value="Weight Loss" className="bg-slate-800">Weight Loss</option>
+                <option value="Weight Gain" className="bg-slate-800">Weight Gain</option>
+                <option value="Fat Loss" className="bg-slate-800">Fat Loss</option>
+                <option value="Muscle Building" className="bg-slate-800">Muscle Building</option>
+                <option value="General Fitness" className="bg-slate-800">General Fitness</option>
+              </select>
             ) : (
               <span className="text-white font-medium text-[13px]">
                 {userData?.goal || 'Muscle Building'}
@@ -399,6 +510,41 @@ const ProfilePage = () => {
           </button>
         </div>
       </div>
+
+      {/* Save Confirmation Modal */}
+      {showSaveModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900/95 backdrop-blur-xl rounded-2xl border border-slate-700/50 p-6 w-[320px] shadow-2xl">
+            <div className="flex flex-col items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
+                <svg className="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-white text-center">Save Changes</h3>
+            </div>
+            
+            <p className="text-slate-300 mb-6 text-sm text-center">
+              Are you sure you want to save these changes to your profile?
+            </p>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={handleCancelSave}
+                className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-semibold transition-colors text-sm"
+              >
+                No
+              </button>
+              <button
+                onClick={handleConfirmSave}
+                className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors text-sm"
+              >
+                Yes, Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
