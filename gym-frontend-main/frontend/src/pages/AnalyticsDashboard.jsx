@@ -23,10 +23,6 @@ const AnalyticsDashboard = () => {
       return;
     }
 
-    // Prevent scrolling
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-
     // Fetch user data
     const fetchUserData = async () => {
       try {
@@ -45,33 +41,47 @@ const AnalyticsDashboard = () => {
     };
 
     fetchUserData();
-
-    return () => {
-      document.body.style.overflow = 'auto';
-      document.documentElement.style.overflow = 'auto';
-    };
   }, [navigate]);
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center p-4 overflow-hidden">
+    <>
       <AnimatedBackground />
+      
+      {/* Fixed Header Bar */}
+      <header className="fixed top-0 left-0 right-0 z-50 border-b border-slate-700/50 bg-slate-900/50 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+              <Activity className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-xl font-bold">
+              <span className="text-white">GYM</span>
+              <span className="text-blue-400">eye</span>
+            </span>
+          </div>
 
-      {/* Main Dashboard Card - Transparent */}
-      <div className="relative z-10 w-full max-w-6xl p-6 max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="w-8 h-8 rounded-lg bg-slate-800/50 hover:bg-slate-800/70 flex items-center justify-center transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5 text-slate-400" />
-          </button>
-          <h1 className="text-2xl font-bold text-white">Analytics Dashboard</h1>
-          <div className="w-8"></div>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 text-slate-400" />
+            </button>
+            <button 
+              onClick={() => navigate('/profile')}
+              className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold hover:bg-blue-600 transition-colors"
+            >
+              {userData?.name?.charAt(0).toUpperCase() || 'U'}
+            </button>
+          </div>
         </div>
-
-        {/* Stats Section */}
-        <div className="bg-slate-900/95 backdrop-blur-xl rounded-[28px] shadow-2xl border border-slate-700/50 p-6 mb-6">
+      </header>
+      
+      <div className="min-h-screen flex flex-col relative pt-[73px]">
+        {/* Main Content */}
+        <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto px-6 pt-4 pb-6">
+          {/* Stats Section */}
+          <div className="bg-slate-900/95 backdrop-blur-xl rounded-[28px] shadow-2xl border border-slate-700/50 p-6 mb-6">
           {/* Content */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Workouts This Month */}
@@ -180,7 +190,7 @@ const AnalyticsDashboard = () => {
         </div>
 
         {/* Weekly Activity Chart */}
-        <div className="bg-slate-900/95 backdrop-blur-xl rounded-[28px] shadow-2xl border border-slate-700/50 p-6">
+        <div className="bg-slate-900/95 backdrop-blur-xl rounded-[28px] shadow-2xl border border-slate-700/50 p-6 mb-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <svg className="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -217,8 +227,150 @@ const AnalyticsDashboard = () => {
             </div>
           </div>
         </div>
+
+        {/* Progress Section */}
+        <div className="bg-slate-900/95 backdrop-blur-xl rounded-[28px] shadow-2xl border border-slate-700/50 p-6 mb-6">
+          <div className="flex items-center gap-3 mb-6">
+            <TrendingUp className="w-6 h-6 text-purple-400" />
+            <h2 className="text-xl font-bold text-white">Progress</h2>
+          </div>
+
+          <div className="space-y-6">
+            {/* Weight Goal */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-300 text-sm">Weight Goal</span>
+                <span className="text-white font-semibold">72 → 68 kg</span>
+              </div>
+              <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full" style={{ width: '60%' }}></div>
+              </div>
+            </div>
+
+            {/* Workouts */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-300 text-sm">Workouts</span>
+                <span className="text-white font-semibold">12 / 20</span>
+              </div>
+              <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-purple-500 to-purple-400 rounded-full" style={{ width: '60%' }}></div>
+              </div>
+            </div>
+
+            {/* Calorie Target */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-slate-300 text-sm">Calorie Target</span>
+                <span className="text-white font-semibold">85% avg</span>
+              </div>
+              <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-pink-500 to-pink-400 rounded-full" style={{ width: '85%' }}></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Workouts Section */}
+        <div className="bg-slate-900/95 backdrop-blur-xl rounded-[28px] shadow-2xl border border-slate-700/50 p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <Activity className="w-6 h-6 text-purple-400" />
+            <h2 className="text-xl font-bold text-white">Recent</h2>
+          </div>
+
+          <div className="space-y-3">
+            {/* Upper Body Strength */}
+            <div className="flex items-center justify-between p-4 bg-slate-800/30 rounded-xl hover:bg-slate-800/50 transition-colors">
+              <div className="flex items-center gap-4">
+                <div className="text-3xl">💪</div>
+                <div>
+                  <div className="text-white font-semibold">Upper Body Strength</div>
+                  <div className="flex items-center gap-3 text-slate-400 text-sm mt-1">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>45 min</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Flame className="w-3.5 h-3.5" />
+                      <span>320</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <span className="text-slate-400 text-sm">Today</span>
+            </div>
+
+            {/* HIIT Cardio Blast */}
+            <div className="flex items-center justify-between p-4 bg-slate-800/30 rounded-xl hover:bg-slate-800/50 transition-colors">
+              <div className="flex items-center gap-4">
+                <div className="text-3xl">🔥</div>
+                <div>
+                  <div className="text-white font-semibold">HIIT Cardio Blast</div>
+                  <div className="flex items-center gap-3 text-slate-400 text-sm mt-1">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>30 min</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Flame className="w-3.5 h-3.5" />
+                      <span>410</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <span className="text-slate-400 text-sm">Yesterday</span>
+            </div>
+
+            {/* Leg Day Power */}
+            <div className="flex items-center justify-between p-4 bg-slate-800/30 rounded-xl hover:bg-slate-800/50 transition-colors">
+              <div className="flex items-center gap-4">
+                <div className="text-3xl">🦵</div>
+                <div>
+                  <div className="text-white font-semibold">Leg Day Power</div>
+                  <div className="flex items-center gap-3 text-slate-400 text-sm mt-1">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>50 min</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Flame className="w-3.5 h-3.5" />
+                      <span>380</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <span className="text-slate-400 text-sm">2d ago</span>
+            </div>
+
+            {/* Core & Flexibility */}
+            <div className="flex items-center justify-between p-4 bg-slate-800/30 rounded-xl hover:bg-slate-800/50 transition-colors">
+              <div className="flex items-center gap-4">
+                <div className="text-3xl">🧘</div>
+                <div>
+                  <div className="text-white font-semibold">Core & Flexibility</div>
+                  <div className="flex items-center gap-3 text-slate-400 text-sm mt-1">
+                    <div className="flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>35 min</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Flame className="w-3.5 h-3.5" />
+                      <span>220</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <span className="text-slate-400 text-sm">3d ago</span>
+              </div>
+            </div>
+          </div>
+        </main>
+
+        {/* Footer - Full width at the end */}
+        <footer className="relative z-10 w-full bg-slate-900/95 backdrop-blur-xl shadow-2xl border-t border-slate-700/50 h-8">
+        </footer>
       </div>
-    </div>
+    </>
   );
 };
 
