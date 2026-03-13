@@ -47,7 +47,7 @@ export default function TrainerPage() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowLoadingScreen(false);
-    }, 2500); // 2.5 seconds for robot animation
+    }, 1200); // 1.2 seconds for robot animation
 
     return () => clearTimeout(timer);
   }, []);
@@ -265,104 +265,119 @@ export default function TrainerPage() {
             <div className="relative mb-6">
               <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                 {/* Treadmill Base */}
-                <rect x="30" y="160" width="140" height="8" rx="4" fill="url(#treadmillGrad)" opacity="0.6"/>
+                <rect x="30" y="165" width="140" height="6" rx="3" fill="url(#treadmillGrad)" opacity="0.6"/>
                 
                 {/* Treadmill Belt Lines (moving) */}
                 <g opacity="0.4">
-                  <line x1="40" y1="164" x2="60" y2="164" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round">
-                    <animate attributeName="x1" values="40;160" dur="0.6s" repeatCount="indefinite"/>
-                    <animate attributeName="x2" values="60;180" dur="0.6s" repeatCount="indefinite"/>
+                  <line x1="40" y1="168" x2="65" y2="168" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round">
+                    <animate attributeName="x1" values="40;170" dur="0.4s" repeatCount="indefinite"/>
+                    <animate attributeName="x2" values="65;195" dur="0.4s" repeatCount="indefinite"/>
                   </line>
-                  <line x1="70" y1="164" x2="90" y2="164" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round">
-                    <animate attributeName="x1" values="70;190" dur="0.6s" repeatCount="indefinite"/>
-                    <animate attributeName="x2" values="90;210" dur="0.6s" repeatCount="indefinite"/>
+                  <line x1="80" y1="168" x2="105" y2="168" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round">
+                    <animate attributeName="x1" values="80;210" dur="0.4s" repeatCount="indefinite"/>
+                    <animate attributeName="x2" values="105;235" dur="0.4s" repeatCount="indefinite"/>
                   </line>
-                  <line x1="100" y1="164" x2="120" y2="164" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round">
-                    <animate attributeName="x1" values="100;220" dur="0.6s" repeatCount="indefinite"/>
-                    <animate attributeName="x2" values="120;240" dur="0.6s" repeatCount="indefinite"/>
-                  </line>
-                  <line x1="130" y1="164" x2="150" y2="164" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round">
-                    <animate attributeName="x1" values="130;250" dur="0.6s" repeatCount="indefinite"/>
-                    <animate attributeName="x2" values="150;270" dur="0.6s" repeatCount="indefinite"/>
+                  <line x1="120" y1="168" x2="145" y2="168" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round">
+                    <animate attributeName="x1" values="120;250" dur="0.4s" repeatCount="indefinite"/>
+                    <animate attributeName="x2" values="145;275" dur="0.4s" repeatCount="indefinite"/>
                   </line>
                 </g>
 
-                {/* Robot Body - Bouncing */}
+                {/* Antenna - Falls and explodes */}
                 <g>
                   <animateTransform 
                     attributeName="transform" 
                     type="translate" 
-                    values="0,0; 0,-8; 0,0" 
-                    dur="0.6s" 
-                    repeatCount="indefinite"/>
+                    values="0,-150; 0,0; -30,-40" 
+                    dur="1.2s" 
+                    fill="freeze"
+                    keyTimes="0; 0.3; 1"
+                    calcMode="spline"
+                    keySplines="0.34 1.56 0.64 1; 0.8 0 1 1"/>
+                  <animate attributeName="opacity" values="1; 1; 0" dur="1.2s" fill="freeze" keyTimes="0; 0.3; 1"/>
+                  <line x1="100" y1="60" x2="100" y2="80" stroke="url(#outlineGrad)" strokeWidth="3" strokeLinecap="round"/>
+                  <circle cx="100" cy="60" r="4" fill="url(#glowGrad)"/>
+                </g>
+
+                {/* Robot Head - Falls and explodes */}
+                <g>
+                  <animateTransform 
+                    attributeName="transform" 
+                    type="translate" 
+                    values="0,-150; 0,0; 0,0" 
+                    dur="1.2s" 
+                    fill="freeze"
+                    keyTimes="0; 0.3; 1"
+                    calcMode="spline"
+                    keySplines="0.34 1.56 0.64 1; 0.42 0 0.58 1"/>
+                  <animate attributeName="opacity" values="1; 1; 0" dur="1.2s" fill="freeze" keyTimes="0; 0.3; 0.4"/>
+                  
+                  {/* Head */}
+                  <rect x="70" y="80" width="60" height="50" rx="12" stroke="url(#outlineGrad)" strokeWidth="4" fill="none"/>
+                  
+                  {/* Eyes */}
+                  <rect x="82" y="98" width="10" height="14" rx="3" fill="url(#eyeGrad)"/>
+                  <rect x="108" y="98" width="10" height="14" rx="3" fill="url(#eyeGrad)"/>
+
+                  {/* Mouth */}
+                  <path d="M 85 115 Q 100 120 115 115" stroke="url(#outlineGrad)" strokeWidth="3" fill="none" strokeLinecap="round"/>
+                </g>
+
+                {/* Explosion Particles */}
+                <g>
+                  <animate attributeName="opacity" values="0; 0; 1; 0" dur="1.2s" fill="freeze" keyTimes="0; 0.3; 0.35; 1"/>
+                  <circle cx="100" cy="100" r="3" fill="#60a5fa">
+                    <animate attributeName="cx" values="100; 70" dur="1.2s" fill="freeze" keyTimes="0; 1"/>
+                    <animate attributeName="cy" values="100; 80" dur="1.2s" fill="freeze" keyTimes="0; 1"/>
+                  </circle>
+                  <circle cx="100" cy="100" r="3" fill="#a78bfa">
+                    <animate attributeName="cx" values="100; 130" dur="1.2s" fill="freeze" keyTimes="0; 1"/>
+                    <animate attributeName="cy" values="100; 75" dur="1.2s" fill="freeze" keyTimes="0; 1"/>
+                  </circle>
+                  <circle cx="100" cy="100" r="3" fill="#c084fc">
+                    <animate attributeName="cx" values="100; 85" dur="1.2s" fill="freeze" keyTimes="0; 1"/>
+                    <animate attributeName="cy" values="100; 120" dur="1.2s" fill="freeze" keyTimes="0; 1"/>
+                  </circle>
+                  <circle cx="100" cy="100" r="3" fill="#60a5fa">
+                    <animate attributeName="cx" values="100; 115" dur="1.2s" fill="freeze" keyTimes="0; 1"/>
+                    <animate attributeName="cy" values="100; 125" dur="1.2s" fill="freeze" keyTimes="0; 1"/>
+                  </circle>
+                  <circle cx="100" cy="100" r="2" fill="#a78bfa">
+                    <animate attributeName="cx" values="100; 60" dur="1.2s" fill="freeze" keyTimes="0; 1"/>
+                    <animate attributeName="cy" values="100; 100" dur="1.2s" fill="freeze" keyTimes="0; 1"/>
+                  </circle>
+                  <circle cx="100" cy="100" r="2" fill="#c084fc">
+                    <animate attributeName="cx" values="100; 140" dur="1.2s" fill="freeze" keyTimes="0; 1"/>
+                    <animate attributeName="cy" values="100; 105" dur="1.2s" fill="freeze" keyTimes="0; 1"/>
+                  </circle>
+                </g>
+
+                {/* Floating Head - Appears after explosion */}
+                <g>
+                  <animate attributeName="opacity" values="0; 0; 1" dur="1.2s" fill="freeze" keyTimes="0; 0.4; 0.6"/>
+                  <animateTransform 
+                    attributeName="transform" 
+                    type="translate" 
+                    values="0,0; 0,-3; 0,0" 
+                    dur="2s" 
+                    repeatCount="indefinite"
+                    begin="0.5s"/>
                   
                   {/* Antenna */}
-                  <line x1="100" y1="40" x2="100" y2="60" stroke="url(#outlineGrad)" strokeWidth="3" strokeLinecap="round"/>
-                  <circle cx="100" cy="40" r="4" fill="url(#glowGrad)">
-                    <animate attributeName="opacity" values="1;0.3;1" dur="1s" repeatCount="indefinite"/>
+                  <line x1="100" y1="60" x2="100" y2="80" stroke="url(#outlineGrad)" strokeWidth="3" strokeLinecap="round"/>
+                  <circle cx="100" cy="60" r="4" fill="url(#glowGrad)">
+                    <animate attributeName="opacity" values="1;0.3;1" dur="1s" repeatCount="indefinite" begin="0.5s"/>
                   </circle>
 
                   {/* Head */}
-                  <rect x="70" y="60" width="60" height="50" rx="12" stroke="url(#outlineGrad)" strokeWidth="4" fill="none"/>
+                  <rect x="70" y="80" width="60" height="50" rx="12" stroke="url(#outlineGrad)" strokeWidth="4" fill="none"/>
                   
                   {/* Eyes */}
-                  <rect x="82" y="78" width="10" height="14" rx="3" fill="url(#eyeGrad)"/>
-                  <rect x="108" y="78" width="10" height="14" rx="3" fill="url(#eyeGrad)"/>
+                  <rect x="82" y="98" width="10" height="14" rx="3" fill="url(#eyeGrad)"/>
+                  <rect x="108" y="98" width="10" height="14" rx="3" fill="url(#eyeGrad)"/>
 
-                  {/* Mouth */}
-                  <line x1="85" y1="98" x2="115" y2="98" stroke="url(#outlineGrad)" strokeWidth="3" strokeLinecap="round"/>
-
-                  {/* Body */}
-                  <rect x="75" y="118" width="50" height="45" rx="14" stroke="url(#outlineGrad)" strokeWidth="4" fill="none"/>
-
-                  {/* Chest Circle */}
-                  <circle cx="100" cy="140" r="6" fill="url(#glowGrad)">
-                    <animate attributeName="opacity" values="1;0.4;1" dur="1.5s" repeatCount="indefinite"/>
-                  </circle>
-                </g>
-
-                {/* Left Arm - Swinging */}
-                <g transform-origin="70 125">
-                  <animateTransform 
-                    attributeName="transform" 
-                    type="rotate" 
-                    values="30 70 125; -30 70 125; 30 70 125" 
-                    dur="0.6s" 
-                    repeatCount="indefinite"/>
-                  <rect x="52" y="120" width="18" height="30" rx="9" stroke="url(#outlineGrad)" strokeWidth="4" fill="none"/>
-                </g>
-
-                {/* Right Arm - Swinging (opposite) */}
-                <g transform-origin="130 125">
-                  <animateTransform 
-                    attributeName="transform" 
-                    type="rotate" 
-                    values="-30 130 125; 30 130 125; -30 130 125" 
-                    dur="0.6s" 
-                    repeatCount="indefinite"/>
-                  <rect x="130" y="120" width="18" height="30" rx="9" stroke="url(#outlineGrad)" strokeWidth="4" fill="none"/>
-                </g>
-
-                {/* Left Leg - Running */}
-                <g transform-origin="85 163">
-                  <animateTransform 
-                    attributeName="transform" 
-                    type="rotate" 
-                    values="-40 85 163; 40 85 163; -40 85 163" 
-                    dur="0.6s" 
-                    repeatCount="indefinite"/>
-                  <rect x="82" y="163" width="12" height="28" rx="6" stroke="url(#outlineGrad)" strokeWidth="4" fill="none"/>
-                </g>
-
-                {/* Right Leg - Running (opposite) */}
-                <g transform-origin="115 163">
-                  <animateTransform 
-                    attributeName="transform" 
-                    type="rotate" 
-                    values="40 115 163; -40 115 163; 40 115 163" 
-                    dur="0.6s" 
-                    repeatCount="indefinite"/>
-                  <rect x="106" y="163" width="12" height="28" rx="6" stroke="url(#outlineGrad)" strokeWidth="4" fill="none"/>
+                  {/* Mouth - Smile */}
+                  <path d="M 85 115 Q 100 120 115 115" stroke="url(#outlineGrad)" strokeWidth="3" fill="none" strokeLinecap="round"/>
                 </g>
 
                 <defs>
@@ -371,7 +386,7 @@ export default function TrainerPage() {
                     <stop offset="50%" stopColor="#a78bfa"/>
                     <stop offset="100%" stopColor="#c084fc"/>
                   </linearGradient>
-                  <linearGradient id="treadmillGrad" x1="30" y1="164" x2="170" y2="164" gradientUnits="userSpaceOnUse">
+                  <linearGradient id="treadmillGrad" x1="30" y1="168" x2="170" y2="168" gradientUnits="userSpaceOnUse">
                     <stop offset="0%" stopColor="#1e293b"/>
                     <stop offset="50%" stopColor="#334155"/>
                     <stop offset="100%" stopColor="#1e293b"/>
@@ -390,9 +405,9 @@ export default function TrainerPage() {
 
             {/* Text */}
             <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent animate-fade-in">
-              Warming up...
+              Hey there!
             </h2>
-            <p className="text-slate-400 text-sm mt-2 animate-fade-in" style={{ animationDelay: '0.2s' }}>Your AI Coach is getting ready</p>
+            <p className="text-slate-400 text-sm mt-2 animate-fade-in" style={{ animationDelay: '0.2s' }}>Your AI Coach is ready</p>
             
             {/* Loading dots */}
             <div className="flex items-center justify-center gap-2 mt-4">

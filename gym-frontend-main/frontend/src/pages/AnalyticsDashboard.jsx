@@ -149,7 +149,7 @@ const AnalyticsDashboard = () => {
           <div className="flex items-center gap-4">
             <button 
               onClick={() => navigate('/profile')}
-              className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold hover:bg-blue-600 transition-colors overflow-hidden"
+              className="w-11 h-11 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold hover:bg-blue-600 transition-colors overflow-hidden ring-4 ring-violet-500/40"
             >
               {userData?.profileImage ? (
                 <img 

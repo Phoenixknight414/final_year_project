@@ -165,7 +165,7 @@ const DashboardPage = () => {
             </button>
             <button 
               onClick={() => navigate('/profile')}
-              className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold hover:bg-blue-600 transition-colors"
+              className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold hover:bg-blue-600 transition-colors border-2 border-violet-500"
             >
               {userData?.name?.charAt(0).toUpperCase() || 'U'}
             </button>

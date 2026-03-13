@@ -55,6 +55,7 @@ const LiveWorkoutPage = () => {
   const [showExerciseDropdown, setShowExerciseDropdown] = useState(false);
   const [workoutStarted, setWorkoutStarted] = useState(false);
   const [Exercisefile, setExerciseFile] = useState(SquatTracker);
+  const [showLoadingScreen, setShowLoadingScreen] = useState(true);
 
   // Workout stats
   const [reps, setReps] = useState(0);
@@ -162,6 +163,15 @@ const LiveWorkoutPage = () => {
       setExerciseFile(selectedExercise.file);
     }
   }, [currentExercise]);
+
+  // Hide loading screen after animation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLoadingScreen(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleTurnOnCamera = async () => {
     try {
@@ -303,6 +313,203 @@ const LiveWorkoutPage = () => {
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex overflow-hidden">
+      {/* Loading Screen with Robot Explosion */}
+      {showLoadingScreen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+          <div className="text-center flex flex-col items-center">
+            {/* Robot Explosion Animation */}
+            <div className="relative mb-6">
+              <svg width="200" height="240" viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+                
+                {/* Robot Head - Stays in center */}
+                <g>
+                  <animateTransform 
+                    attributeName="transform" 
+                    type="translate" 
+                    values="0,0; 0,-5; 0,0" 
+                    dur="2s" 
+                    repeatCount="indefinite"
+                    begin="0.2s"/>
+                  
+                  {/* Antenna */}
+                  <line x1="100" y1="80" x2="100" y2="100" stroke="url(#outlineGrad)" strokeWidth="3" strokeLinecap="round"/>
+                  <circle cx="100" cy="80" r="4" fill="url(#glowGrad)">
+                    <animate attributeName="opacity" values="1;0.3;1" dur="1s" repeatCount="indefinite"/>
+                  </circle>
+
+                  {/* Head */}
+                  <rect x="70" y="100" width="60" height="50" rx="12" stroke="url(#outlineGrad)" strokeWidth="4" fill="none"/>
+                  
+                  {/* Eyes */}
+                  <rect x="82" y="118" width="10" height="14" rx="3" fill="url(#eyeGrad)"/>
+                  <rect x="108" y="118" width="10" height="14" rx="3" fill="url(#eyeGrad)"/>
+
+                  {/* Mouth - Smile */}
+                  <path d="M 85 138 Q 100 143 115 138" stroke="url(#outlineGrad)" strokeWidth="3" fill="none" strokeLinecap="round"/>
+                </g>
+
+                {/* Body - Explodes and disappears */}
+                <g>
+                  <animate attributeName="opacity" values="1; 1; 0" dur="0.5s" fill="freeze" keyTimes="0; 0.3; 0.5"/>
+                  <animateTransform 
+                    attributeName="transform" 
+                    type="translate" 
+                    values="0,0; 0,80; 0,150" 
+                    dur="0.5s" 
+                    fill="freeze"
+                    keyTimes="0; 0.3; 1"/>
+                  <rect x="75" y="158" width="50" height="50" rx="14" stroke="url(#outlineGrad)" strokeWidth="4" fill="none"/>
+                  <circle cx="100" cy="183" r="6" fill="url(#glowGrad)"/>
+                </g>
+
+                {/* Left Arm - Flies off to top-left */}
+                <g>
+                  <animate attributeName="opacity" values="1; 1; 0" dur="0.5s" fill="freeze" keyTimes="0; 0.3; 0.8"/>
+                  <animateTransform 
+                    attributeName="transform" 
+                    type="translate" 
+                    values="0,0; -80,-60; -150,-120" 
+                    dur="0.5s" 
+                    fill="freeze"
+                    keyTimes="0; 0.3; 1"/>
+                  <animateTransform 
+                    attributeName="transform" 
+                    type="rotate" 
+                    values="0 65 163; -180 65 163; -360 65 163" 
+                    dur="0.5s" 
+                    fill="freeze"
+                    additive="sum"/>
+                  <rect x="65" y="163" width="10" height="28" rx="5" stroke="url(#outlineGrad)" strokeWidth="3" fill="none"/>
+                </g>
+
+                {/* Right Arm - Flies off to top-right */}
+                <g>
+                  <animate attributeName="opacity" values="1; 1; 0" dur="0.5s" fill="freeze" keyTimes="0; 0.3; 0.8"/>
+                  <animateTransform 
+                    attributeName="transform" 
+                    type="translate" 
+                    values="0,0; 80,-60; 150,-120" 
+                    dur="0.5s" 
+                    fill="freeze"
+                    keyTimes="0; 0.3; 1"/>
+                  <animateTransform 
+                    attributeName="transform" 
+                    type="rotate" 
+                    values="0 128 163; 180 128 163; 360 128 163" 
+                    dur="0.5s" 
+                    fill="freeze"
+                    additive="sum"/>
+                  <rect x="128" y="163" width="10" height="28" rx="5" stroke="url(#outlineGrad)" strokeWidth="3" fill="none"/>
+                </g>
+
+                {/* Left Leg - Flies off to bottom-left */}
+                <g>
+                  <animate attributeName="opacity" values="1; 1; 0" dur="0.5s" fill="freeze" keyTimes="0; 0.3; 0.8"/>
+                  <animateTransform 
+                    attributeName="transform" 
+                    type="translate" 
+                    values="0,0; -60,40; -120,100" 
+                    dur="0.5s" 
+                    fill="freeze"
+                    keyTimes="0; 0.3; 1"/>
+                  <animateTransform 
+                    attributeName="transform" 
+                    type="rotate" 
+                    values="0 87 208; 180 87 208; 360 87 208" 
+                    dur="0.5s" 
+                    fill="freeze"
+                    additive="sum"/>
+                  <rect x="82" y="208" width="10" height="35" rx="5" stroke="url(#outlineGrad)" strokeWidth="3" fill="none"/>
+                  <rect x="78" y="243" width="18" height="10" rx="5" stroke="url(#outlineGrad)" strokeWidth="3" fill="none"/>
+                </g>
+
+                {/* Right Leg - Flies off to bottom-right */}
+                <g>
+                  <animate attributeName="opacity" values="1; 1; 0" dur="0.5s" fill="freeze" keyTimes="0; 0.3; 0.8"/>
+                  <animateTransform 
+                    attributeName="transform" 
+                    type="translate" 
+                    values="0,0; 60,40; 120,100" 
+                    dur="0.5s" 
+                    fill="freeze"
+                    keyTimes="0; 0.3; 1"/>
+                  <animateTransform 
+                    attributeName="transform" 
+                    type="rotate" 
+                    values="0 113 208; -180 113 208; -360 113 208" 
+                    dur="0.5s" 
+                    fill="freeze"
+                    additive="sum"/>
+                  <rect x="108" y="208" width="10" height="35" rx="5" stroke="url(#outlineGrad)" strokeWidth="3" fill="none"/>
+                  <rect x="104" y="243" width="18" height="10" rx="5" stroke="url(#outlineGrad)" strokeWidth="3" fill="none"/>
+                </g>
+
+                {/* Explosion Flash */}
+                <circle cx="100" cy="180" r="40" fill="url(#explosionGrad)">
+                  <animate attributeName="opacity" values="0; 1; 0" dur="0.5s" fill="freeze" keyTimes="0; 0.3; 0.4"/>
+                  <animate attributeName="r" values="20; 60; 80" dur="0.5s" fill="freeze" keyTimes="0; 0.3; 0.5"/>
+                </circle>
+
+                {/* Explosion Particles */}
+                <g>
+                  <animate attributeName="opacity" values="0; 1; 0" dur="0.5s" fill="freeze" keyTimes="0; 0.3; 0.7"/>
+                  <circle cx="100" cy="180" r="4" fill="#60a5fa">
+                    <animate attributeName="cx" values="100; 50" dur="0.5s" fill="freeze"/>
+                    <animate attributeName="cy" values="180; 140" dur="0.5s" fill="freeze"/>
+                  </circle>
+                  <circle cx="100" cy="180" r="4" fill="#a78bfa">
+                    <animate attributeName="cx" values="100; 150" dur="0.5s" fill="freeze"/>
+                    <animate attributeName="cy" values="180; 140" dur="0.5s" fill="freeze"/>
+                  </circle>
+                  <circle cx="100" cy="180" r="3" fill="#c084fc">
+                    <animate attributeName="cx" values="100; 70" dur="0.5s" fill="freeze"/>
+                    <animate attributeName="cy" values="180; 220" dur="0.5s" fill="freeze"/>
+                  </circle>
+                  <circle cx="100" cy="180" r="3" fill="#60a5fa">
+                    <animate attributeName="cx" values="100; 130" dur="0.5s" fill="freeze"/>
+                    <animate attributeName="cy" values="180; 220" dur="0.5s" fill="freeze"/>
+                  </circle>
+                </g>
+
+                <defs>
+                  <linearGradient id="outlineGrad" x1="0" y1="0" x2="200" y2="240" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#60a5fa"/>
+                    <stop offset="50%" stopColor="#a78bfa"/>
+                    <stop offset="100%" stopColor="#c084fc"/>
+                  </linearGradient>
+                  <radialGradient id="glowGrad" cx="0.5" cy="0.5" r="0.5">
+                    <stop offset="0%" stopColor="#60a5fa"/>
+                    <stop offset="100%" stopColor="#a78bfa"/>
+                  </radialGradient>
+                  <radialGradient id="explosionGrad" cx="0.5" cy="0.5" r="0.5">
+                    <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.8"/>
+                    <stop offset="50%" stopColor="#a78bfa" stopOpacity="0.4"/>
+                    <stop offset="100%" stopColor="#c084fc" stopOpacity="0"/>
+                  </radialGradient>
+                  <linearGradient id="eyeGrad" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+                    <stop offset="0%" stopColor="#60a5fa"/>
+                    <stop offset="100%" stopColor="#a78bfa"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+
+            {/* Text */}
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent animate-fade-in">
+              Let's Get Moving!
+            </h2>
+            <p className="text-slate-400 text-sm mt-2 animate-fade-in" style={{ animationDelay: '0.2s' }}>Preparing your workout session</p>
+            
+            {/* Loading dots */}
+            <div className="flex items-center justify-center gap-2 mt-4">
+              <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Left Side - Camera View */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
