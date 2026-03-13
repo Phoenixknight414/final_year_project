@@ -16,6 +16,7 @@ const AnalyticsDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [userData, setUserData] = useState(null);
+  const [recentWorkouts, setRecentWorkouts] = useState([]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -43,7 +44,25 @@ const AnalyticsDashboard = () => {
       }
     };
 
+    // Fetch recent workout sessions
+    const fetchRecentWorkouts = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/workout/sessions/recent', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        const data = await response.json();
+        if (data.success) {
+          setRecentWorkouts(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching recent workouts:', error);
+      }
+    };
+
     fetchUserData();
+    fetchRecentWorkouts();
   }, [navigate, location]);
 
   // Refetch data when window gains focus
@@ -68,6 +87,47 @@ const AnalyticsDashboard = () => {
       window.removeEventListener('focus', handleFocus);
     };
   }, []);
+
+  // Exercise icon mapping
+  const getExerciseIcon = (exerciseName) => {
+    const iconMap = {
+      'Bicep Curl': '💪',
+      'Hammer Curl': '🔨',
+      'Push-ups': '🤸',
+      'Chest Fly': '🦅',
+      'Lateral Raises': '🙆',
+      'Front Raises': '🙋',
+      'Squats': '🏋️',
+      'Lunges': '🦵'
+    };
+    return iconMap[exerciseName] || '💪';
+  };
+
+  // Format time ago
+  const getTimeAgo = (date) => {
+    const now = new Date();
+    const workoutDate = new Date(date);
+    const diffInMs = now - workoutDate;
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    if (diffInHours < 24) {
+      return 'Today';
+    } else if (diffInDays === 1) {
+      return 'Yesterday';
+    } else {
+      return `${diffInDays}d ago`;
+    }
+  };
+
+  // Format duration from seconds to minutes
+  const formatDuration = (seconds) => {
+    if (seconds < 60) {
+      return `${seconds} sec`;
+    }
+    const minutes = Math.floor(seconds / 60);
+    return `${minutes} min`;
+  };
 
   return (
     <>
@@ -421,91 +481,37 @@ const AnalyticsDashboard = () => {
           </div>
 
           <div className="space-y-3">
-            {/* Upper Body Strength */}
-            <div className="flex items-center justify-between p-4 bg-slate-800/30 rounded-xl hover:bg-slate-800/50 transition-colors">
-              <div className="flex items-center gap-4">
-                <div className="text-3xl">💪</div>
-                <div>
-                  <div className="text-white font-semibold">Upper Body Strength</div>
-                  <div className="flex items-center gap-3 text-slate-400 text-sm mt-1">
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" />
-                      <span>45 min</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Flame className="w-3.5 h-3.5" />
-                      <span>320</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <span className="text-slate-400 text-sm">Today</span>
-            </div>
-
-            {/* HIIT Cardio Blast */}
-            <div className="flex items-center justify-between p-4 bg-slate-800/30 rounded-xl hover:bg-slate-800/50 transition-colors">
-              <div className="flex items-center gap-4">
-                <div className="text-3xl">🔥</div>
-                <div>
-                  <div className="text-white font-semibold">HIIT Cardio Blast</div>
-                  <div className="flex items-center gap-3 text-slate-400 text-sm mt-1">
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" />
-                      <span>30 min</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Flame className="w-3.5 h-3.5" />
-                      <span>410</span>
+            {recentWorkouts.length > 0 ? (
+              recentWorkouts.map((workout, index) => (
+                <div key={index} className="flex items-center justify-between p-4 bg-slate-800/30 rounded-xl hover:bg-slate-800/50 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="text-3xl">{getExerciseIcon(workout.exerciseName)}</div>
+                    <div>
+                      <div className="text-white font-semibold">{workout.exerciseName}</div>
+                      <div className="flex items-center gap-3 text-slate-400 text-sm mt-1">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>{formatDuration(workout.duration)}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Flame className="w-3.5 h-3.5" />
+                          <span>{workout.calories}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
+                  <span className="text-slate-400 text-sm">{getTimeAgo(workout.createdAt)}</span>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-slate-400">
+                <Activity className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                <p className="text-sm">No recent workouts yet</p>
+                <p className="text-xs mt-1">Start a workout to see it here!</p>
               </div>
-              <span className="text-slate-400 text-sm">Yesterday</span>
-            </div>
-
-            {/* Leg Day Power */}
-            <div className="flex items-center justify-between p-4 bg-slate-800/30 rounded-xl hover:bg-slate-800/50 transition-colors">
-              <div className="flex items-center gap-4">
-                <div className="text-3xl">🦵</div>
-                <div>
-                  <div className="text-white font-semibold">Leg Day Power</div>
-                  <div className="flex items-center gap-3 text-slate-400 text-sm mt-1">
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" />
-                      <span>50 min</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Flame className="w-3.5 h-3.5" />
-                      <span>380</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <span className="text-slate-400 text-sm">2d ago</span>
-            </div>
-
-            {/* Core & Flexibility */}
-            <div className="flex items-center justify-between p-4 bg-slate-800/30 rounded-xl hover:bg-slate-800/50 transition-colors">
-              <div className="flex items-center gap-4">
-                <div className="text-3xl">🧘</div>
-                <div>
-                  <div className="text-white font-semibold">Core & Flexibility</div>
-                  <div className="flex items-center gap-3 text-slate-400 text-sm mt-1">
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" />
-                      <span>35 min</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Flame className="w-3.5 h-3.5" />
-                      <span>220</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <span className="text-slate-400 text-sm">3d ago</span>
-              </div>
-            </div>
+            )}
           </div>
+        </div>
         </main>
 
         {/* Footer - Full width at the end */}

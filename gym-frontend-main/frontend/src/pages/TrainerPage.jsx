@@ -17,7 +17,9 @@ export default function TrainerPage() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showLoadingScreen, setShowLoadingScreen] = useState(true);
   const messagesEndRef = useRef(null);
+  const inputRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const wsRef = useRef(null);
@@ -30,6 +32,25 @@ export default function TrainerPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Auto-focus input when chat opens
+  useEffect(() => {
+    if (isChatOpen && inputRef.current) {
+      // Small delay to ensure the input is visible before focusing
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  }, [isChatOpen]);
+
+  // Hide loading screen after animation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLoadingScreen(false);
+    }, 2500); // 2.5 seconds for robot animation
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Connect to trainer WebSocket for text messages
   useEffect(() => {
@@ -96,6 +117,11 @@ export default function TrainerPage() {
 
   const handleSendMessage = () => {
     if (!inputText.trim() || !wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
+
+    // If AI is currently responding, stop it first
+    if (isLoading) {
+      stopAIResponse();
+    }
 
     const userMessage = {
       id: Date.now(),
@@ -202,12 +228,26 @@ export default function TrainerPage() {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      // Keep isLoading true until AI response completes
+    }
+  };
+
+  const stopAIResponse = () => {
+    setIsLoading(false);
+    // Optionally close and reconnect WebSocket to stop generation
+    if (wsRef.current) {
+      wsRef.current.close();
+    }
+    if (audioWsRef.current) {
+      audioWsRef.current.close();
     }
   };
 
   const toggleRecording = () => {
     if (isRecording) {
       stopRecording();
+    } else if (isLoading) {
+      stopAIResponse();
     } else {
       startRecording();
     }
@@ -216,6 +256,50 @@ export default function TrainerPage() {
   return (
     <div className="min-h-screen text-white flex flex-col relative">
       <AnimatedBackground />
+      
+      {/* Loading Screen with Robot Animation */}
+      {showLoadingScreen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+          <div className="text-center">
+            {/* Robot Container */}
+            <div className="relative mb-8">
+              {/* Robot Body */}
+              <div className="relative inline-block animate-bounce">
+                {/* Head */}
+                <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mx-auto mb-2 relative shadow-2xl shadow-blue-500/50">
+                  {/* Eyes */}
+                  <div className="absolute top-6 left-4 w-4 h-4 bg-white rounded-full animate-pulse"></div>
+                  <div className="absolute top-6 right-4 w-4 h-4 bg-white rounded-full animate-pulse"></div>
+                  {/* Smile */}
+                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-10 h-2 border-b-2 border-white rounded-full"></div>
+                  {/* Antenna */}
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-1 h-4 bg-blue-400"></div>
+                  <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-blue-400 rounded-full animate-ping"></div>
+                </div>
+                
+                {/* Body */}
+                <div className="w-20 h-16 bg-gradient-to-br from-blue-600 to-purple-700 rounded-xl mx-auto shadow-xl shadow-blue-500/30">
+                  {/* Chest Light */}
+                  <div className="absolute top-28 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-cyan-400 rounded-full animate-pulse"></div>
+                </div>
+              </div>
+              
+              {/* Waving Hand */}
+              <div className="absolute -right-8 top-8 text-4xl origin-bottom-right animate-wave">
+                👋
+              </div>
+            </div>
+            
+            {/* Text */}
+            <div className="space-y-2 animate-fade-in">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                Hi there!
+              </h2>
+              <p className="text-slate-400 text-lg">Your AI Coach is ready...</p>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Header - Fixed */}
       <div className="fixed top-0 left-0 right-0 z-20 flex items-center justify-between p-4 border-b border-slate-800/50 bg-slate-950/80 backdrop-blur-md">
@@ -293,6 +377,7 @@ export default function TrainerPage() {
         >
           <div className="mx-auto px-6 flex items-center gap-3" style={{ maxWidth: 'calc(100vw - 400px)', minWidth: '400px' }}>
             <input
+              ref={inputRef}
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
@@ -324,14 +409,19 @@ export default function TrainerPage() {
           {/* Mic Button - Center, Larger */}
           <button
             onClick={toggleRecording}
-            disabled={isLoading && !isRecording}
             className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${
               isRecording
                 ? 'bg-red-600 hover:bg-red-700 scale-110'
+                : isLoading
+                ? 'bg-orange-600 hover:bg-orange-700 scale-110'
                 : 'bg-blue-600 hover:bg-blue-700'
             }`}
           >
-            <Mic className="w-7 h-7" />
+            {isLoading && !isRecording ? (
+              <Square className="w-7 h-7" />
+            ) : (
+              <Mic className="w-7 h-7" />
+            )}
           </button>
 
           {/* Chat Button */}
@@ -350,7 +440,13 @@ export default function TrainerPage() {
         {/* Hint Text */}
         <div className="text-center mt-4">
           <p className="text-xs text-slate-500">
-            {isLoading ? 'Processing...' : isRecording ? 'Recording... Tap mic to stop' : isChatOpen ? 'Type your message' : 'Tap to start voice chat'}
+            {isLoading && !isRecording 
+              ? 'AI is responding... Tap mic to stop' 
+              : isRecording 
+              ? 'Recording... Tap mic to stop' 
+              : isChatOpen 
+              ? 'Type your message' 
+              : 'Tap to start voice chat'}
           </p>
         </div>
       </div>
